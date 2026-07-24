@@ -46,64 +46,65 @@
         </div>
 
         <!-- نموذج إضافة منتج جديد متكامل -->
-        <div class="add-box">
-            <h3>إضافة منتج جديد بالسحابة (مع المقاسات والألوان والخصائص) ➕</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">اسم المنتج:</label>
-                    <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت كاجوال أسود">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">سعر الجملة (السعر الأساسي):</label>
-                    <input type="number" id="new-price" class="admin-input" placeholder="350">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">سعر القطعة الأساسي (قبل الخصم):</label>
-                    <input type="number" id="new-oldprice" class="admin-input" placeholder="450">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">القسم:</label>
-                    <select id="new-cat" class="admin-input">
-                        <option value="1">رجالي</option>
-                        <option value="2">نسائي</option>
-                        <option value="3">أطفالي</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع المنتج:</label>
-                    <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت قطن">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع القماش:</label>
-                    <input type="text" id="new-fabric" class="admin-input" placeholder="قطن 100% مصري">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">مسار/رابط الصورة:</label>
-                    <input type="text" id="new-img" class="admin-input" placeholder="images/mens/item1.jpg">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">شارة المنتج (Tag):</label>
-                    <input type="text" id="new-tag" class="admin-input" placeholder="جديد / الأكثر مبيعاً">
-                </div>
-                <!-- حقول مخصصة للألوان والمقاسات الخاصة بالمنتج -->
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">الألوان المتاحة (افصل بينها بفاصلة):</label>
-                    <input type="text" id="new-colors" class="admin-input" value="أسود, أبيض, كحلي, رمادي, زيتي">
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">المقاسات المتاحة (افصل بينها بفاصلة):</label>
-                    <input type="text" id="new-sizes" class="admin-input" value="M, L, XL, 2XL, 3XL">
-                </div>
-            </div>
-            
-            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
-                <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">الألوان والمقاسات الافتراضية التي سيتم تطبيقها تلقائياً للمنتج:</p>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">🎨 الألوان: أسود، أبيض، كحلي، رمادي، زيتي، نبيتي، بيج.</span><br>
-                <span id="preview-sizes-text" style="font-size: 0.8rem; color: var(--text-muted);">📏 المقاسات: (رجالي/نسائي) M, L, XL, 2XL, 3XL</span>
-            </div>
-
-            <button class="black-btn" onclick="addNewProduct()" style="margin-top: 15px; width: 100%; padding: 12px; font-weight: bold;">إضافة ونشر المنتج فوراً للعملاء 🚀</button>
+        <div class="add-box" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+    <h3>إضافة منتج جديد</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px;">
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">اسم المنتج:</label>
+            <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز">
         </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">سعر الجملة:</label>
+            <input type="number" id="new-price" class="admin-input" placeholder="250">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">السعر القطاعي:</label>
+            <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">القسم:</label>
+            <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
+                <option value="1">رجالي</option>
+                <option value="2">نسائي</option>
+                <option value="3">أطفالي</option>
+            </select>
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع المنتج:</label>
+            <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع القماش:</label>
+            <input type="text" id="new-fabric" class="admin-input" placeholder="قطن عالي الجودة">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">رابط الصورة:</label>
+            <input type="text" id="new-img" class="admin-input" placeholder="images/item.jpg">
+        </div>
+        <div>
+            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">شارة المنتج (Tag):</label>
+            <input type="text" id="new-tag" class="admin-input" placeholder="جديد / عرض خاص">
+        </div>
+    </div>
+
+    <!-- اختيار الألوان المتاحة عبر أزرار تفاعلية -->
+    <div style="margin-top: 15px;">
+        <label style="font-size: 0.9rem; display:block; margin-bottom:6px; font-weight:bold;">اختر الألوان المتاحة للمنتج:</label>
+        <div id="admin-colors-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <!-- سيتم تعبئتها تلقائياً بالسكريبت -->
+        </div>
+    </div>
+
+    <!-- اختيار المقاسات المتاحة عبر أزرار تفاعلية -->
+    <div style="margin-top: 15px;">
+        <label style="font-size: 0.9rem; display:block; margin-bottom:6px; font-weight:bold;">اختر المقاسات المتاحة للمنتج:</label>
+        <div id="admin-sizes-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <!-- سيتم تعبئتها تلقائياً حسب القسم (رجالي/نسائي/أطفالي) -->
+        </div>
+    </div>
+
+    <button onclick="addNewProduct()" style="margin-top: 20px; background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">نشر المنتج على الموقع 🚀</button>
+</div>
 
         <!-- جدول التحكم في المنتجات الحالية -->
         <h3>إدارة وتعديل المنتجات الحالية في السحابة 📦</h3>
