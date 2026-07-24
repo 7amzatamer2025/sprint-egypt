@@ -253,9 +253,11 @@ window.openQuickView = function(productId) {
     document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
     document.getElementById("m-img-val").src = product.img;
 
+    // استبدال الألوان العامة بألوان المنتج المخزنة في قاعدة البيانات
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
-    allColorsAr.forEach(color => {
+    const productColors = product.colors || allColorsAr; // ألوان المنتج أو الافتراضية
+    productColors.forEach(color => {
         const box = document.createElement("button");
         box.className = "option-box";
         box.innerText = color;
@@ -265,6 +267,22 @@ window.openQuickView = function(productId) {
             selectedColor = color;
         };
         colorsWrap.appendChild(box);
+    });
+
+    // استبدال المقاسات العامة بمقاسات المنتج المخزنة في قاعدة البيانات
+    const sizesWrap = document.getElementById("m-sizes-options");
+    sizesWrap.innerHTML = "";
+    const activeSizes = product.sizes || (String(product.category) === "3" ? kidsSizes : adultsSizes);
+    activeSizes.forEach(size => {
+        const box = document.createElement("button");
+        box.className = "option-box";
+        box.innerText = size;
+        box.onclick = () => {
+            document.querySelectorAll("#m-sizes-options .option-box").forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedSize = size;
+        };
+        sizesWrap.appendChild(box);
     });
 
     const sizesWrap = document.getElementById("m-sizes-options");
