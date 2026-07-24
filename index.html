@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Sprint Egypt | فخامة الأزياء العصرية</title>
+    
+    <!-- خط القاهرة الفاخر من جوجل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة الأيقونات Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- شريط الإعلانات العلوي المتحرك -->
+    <div class="promo-bar">⚡ مرحبا بكم في Sprent Egypt - خامات قطنية فخمة وتوصيل لجميع المحافظات ⚡</div>
+
+    <!-- الهيدر الذكي المتجاوب -->
+    <header>
+        <div class="container navbar">
+            <button class="nav-btn menu-toggle" id="menu-open-btn" aria-label="فتح القائمة">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <button id="lang-toggle-btn" class="icon-btn">
+         <i class="fa-solid fa-globe"></i> <span id="lang-btn-text">English</span>
+             </button>
+            
+            <!-- اللوجو بالحجم الأكبر -->
+            <div class="logo logo-img-container" id="header-logo-target" onclick="navigateTo('home-page')">
+                <img src="logo.png" alt="Sprint Logo" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('alt-logo-text').style.display='block';">
+                <span id="alt-logo-text" class="logo-text-fallback" style="display:none;">Sprint<span>.</span></span>
+            </div>
+            
+            <nav class="desktop-menu">
+                <a href="#" class="nav-link-item active-link" onclick="navigateTo('home-page')">الرئيسية</a>
+                <a href="#" class="nav-link-item" onclick="navigateTo('shop-page')">المتجر</a>
+                <a href="#" class="nav-link-item" onclick="navigateTo('about-page')">من نحن</a>
+                <a href="#" class="nav-link-item" onclick="navigateTo('contact-page')">اتصل بنا</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="nav-btn theme-toggle-btn" id="theme-toggle-btn" aria-label="تغيير الوضع">
+                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                </button>
+
+                <button class="nav-btn" id="cart-open-btn" aria-label="فتح عربة التسوق">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="badge" id="cart-badge-count">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="overlay-mask" id="global-mask"></div>
+
+    <div class="mobile-menu-drawer" id="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="drawer-close" id="menu-close-btn">&times;</span>
+        </div>
+        <nav class="mobile-menu-links">
+            <a href="#" class="nav-link-item active-link" onclick="navigateTo('home-page')">الرئيسية</a>
+            <a href="#" class="nav-link-item" onclick="navigateTo('shop-page')">المتجر</a>
+            <a href="#" class="nav-link-item" onclick="navigateTo('about-page')">من نحن</a>
+            <a href="#" class="nav-link-item" onclick="navigateTo('contact-page')">اتصل بنا</a>
+        </nav>
+    </div>
+
+    <div class="side-drawer" id="cart-drawer">
+        <div class="drawer-header">
+            <h3>حقيبة التسوق</h3>
+            <span class="drawer-close" id="cart-close-btn">&times;</span>
+        </div>
+        <div class="drawer-items" id="cart-items-container"></div>
+        
+        <div class="drawer-footer">
+            <!-- 🟢 حقول بيانات العميل بنفس تصميم وتنسيق المتجر -->
+            <div class="checkout-form-fields" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="customer-name" placeholder="الاسم الكامل *" style="width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none;">
+                <input type="text" id="customer-address" placeholder="المكان / العنوان بالتفصيل *" style="width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none;">
+                <input type="tel" id="customer-phone" placeholder="رقم الهاتف (واتساب) *" style="width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none;">
+            </div>
+
+            <div class="d-total-row">
+                <span>الإجمالي:</span>
+                <span id="cart-total-value">0 ج.م</span>
+            </div>
+            <button class="black-btn" onclick="triggerCheckout()">تأكيد الطلب عبر الواتساب <i class="fa-brands fa-whatsapp" style="font-size: 1.2rem;"></i></button>
+        </div>
+    </div>
+
+    <!-- الصفحة الأولى: الرئيسية -->
+    <main class="page active-page" id="home-page">
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <h1>نحن وجهتك الفريده عبر الانترنت لمجموعه واسعه من المنتجات (حريمى - رجالى - أطفال ) خليك إسبرينت <span>Sprint Egypt</span></h1>
+                    <p>تشكيلة استثنائية تجمع النمط الكاجوال المعاصر وخامات فخمة صُممت خصيصاً لتعطيك شعوراً بالثقة والراحة طوال اليوم وبأسعار استثنائية.</p>
+                    <a href="#" class="cta-btn" onclick="navigateTo('shop-page')">اكتشف المتجر الآن <i class="fa-solid fa-arrow-left"></i></a>
+                </div>
+                <div class="hero-image-box">
+                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600" alt="Sprint Collection">
+                </div>
+            </div>
+        </section>
+
+        <section class="categories-sec">
+            <div class="container">
+                <div class="section-header">
+                    <h2>تصفح حسب الفئة</h2>
+                    <p class="section-subtitle">أقسام مصممة لتلبي كافة إحتياجات أفراد العائلة</p>
+                </div>
+                <div class="cat-grid">
+                    <div class="cat-card" onclick="openCategoryTab('1')">
+                        <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=500" alt="التشكيلة الرجالية">
+                        <div class="cat-overlay"><h3>التشكيلة الرجالية</h3></div>
+                    </div>
+                    <div class="cat-card" onclick="openCategoryTab('2')">
+                        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=500" alt="التشكيلة النسائية">
+                        <div class="cat-overlay"><h3>التشكيلة النسائية</h3></div>
+                    </div>
+                    <div class="cat-card" onclick="openCategoryTab('3')">
+                        <img src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=500" alt="ملابس الأطفال">
+                        <div class="cat-overlay"><h3>ملابس الأطفال</h3></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- الصفحة الثانية: المتجر -->
+    <div class="page" id="shop-page">
+        <section class="shop-layout">
+            <div class="container">
+                <div class="section-header">
+                    <h2>كتالوج المنتجات</h2>
+                    <p class="section-subtitle">اختر المقاس واللون والنوع والخامة بدقة عالية</p>
+                </div>
+                
+                <div class="filter-tabs">
+                    <button class="tab active" id="tab-all" onclick="filterShop('all')">كل المعروضات</button>
+                    <button class="tab" id="tab-1" onclick="filterShop('1')">ملابس رجالي</button>
+                    <button class="tab" id="tab-2" onclick="filterShop('2')">ملابس حريمي</button>
+                    <button class="tab" id="tab-3" onclick="filterShop('3')">كولكشن الأطفال</button>
+                </div>
+
+                <div class="products-grid" id="shop-products-wrap"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- الصفحة الثالثة: من نحن -->
+    <div class="page" id="about-page">
+        <section class="about-sec">
+            <div class="container about-grid">
+                <div class="about-text">
+                    <h3>قصتنا وشغفنا</h3>
+                    <p>انطلق براند Sprint Egypt بتقديم ملابس تجمع بين الجودة الفخمة والتصاميم العالمية المبتكرة التي يبحث عنها الجميع وبسعر مناسب.</p>
+                    <p>نحن نوفر أسلوب حياة وخامات قطنية 100% مثل البوليفار والانترلوك، وخامات رياضية متميزة لتضمن لك تجربة فريدة.</p>
+                </div>
+                <div class="about-image-box">
+                    <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600" alt="قصة Sprint">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- الصفحة الرابعة: اتصل بنا -->
+    <div class="page" id="contact-page">
+        <section class="contact-sec">
+            <div class="container">
+                <div class="section-header">
+                    <h2>تواصل معنا</h2>
+                    <p class="section-subtitle">فريق الدعم الفني جاهز للإجابة على استفساراتكم على مدار الساعة</p>
+                </div>
+                <div class="contact-grid">
+                    <div class="contact-info-box">
+                        <div class="c-item">
+                            <i class="fa-solid fa-phone"></i>
+                            <div><h4>رقم الهاتف</h4><p dir="ltr">+20 120 787 8777</p></div>
+                        </div>
+                        <div class="c-item">
+                            <i class="fa-solid fa-envelope"></i>
+                            <div><h4>البريد الإلكتروني</h4><p>support@sprintegypt.com</p></div>
+                        </div>
+                    </div>
+                    <form class="contact-form" id="contact-submit-form">
+                        <div class="form-group"><input type="text" placeholder="الاسم الكامل" required></div>
+                        <div class="form-group"><input type="email" placeholder="البريد الإلكتروني" required></div>
+                        <div class="form-group"><textarea rows="5" placeholder="اكتب رسالتك هنا..." required></textarea></div>
+                        <button type="submit" class="black-btn">إرسال الرسالة</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- نافذة العرض السريع المنبثقة -->
+    <div class="modal-popup" id="product-modal">
+        <div class="modal-grid">
+            <div class="m-info-wrap">
+                <span class="m-close" id="modal-close-btn">&times;</span>
+                <h3 class="m-title" id="m-title-val">اسم المنتج</h3>
+                <div class="m-meta-info">
+                    <span class="meta-badge" id="m-type-val">نوع القطعة</span>
+                    <span class="meta-badge text-accent" id="m-fabric-val">الخامة</span>
+                </div>
+                <div class="m-price" id="m-price-val">0 ج.م</div>
+                
+                <div class="selector-wrapper">
+                    <label class="select-label">اختر اللون المفضل:</label>
+                    <div class="options-container" id="m-colors-options"></div>
+                </div>
+
+                <div class="selector-wrapper">
+                    <label class="select-label">اختر المقاس المناسب:</label>
+                    <div class="options-container" id="m-sizes-options"></div>
+                </div>
+
+                <button class="black-btn" id="m-add-btn" style="margin-top: 20px;">إضافة إلى حقيبة التسوق</button>
+            </div>
+            <div class="m-img-wrap">
+                <img id="m-img-val" src="" alt="عرض سريع">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4>عن Sprint Egypt</h4>
+                <p>&copy; 2026 جميع الحقوق محفوظة لمتجر Sprint Egypt. أزياء وخامات تفوق التوقعات.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

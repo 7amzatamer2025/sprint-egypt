@@ -1,0 +1,409 @@
+/* ==========================================================================
+   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase
+   ========================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
+    authDomain: "sprent-cffc6.firebaseapp.com",
+    databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
+    projectId: "sprent-cffc6",
+    storageBucket: "sprent-cffc6.firebasestorage.app",
+    messagingSenderId: "858069126936",
+    appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
+    measurementId: "G-TEWN0253WH"
+};
+
+let db = null;
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+} catch (e) {
+    console.error("Firebase Init Error:", e);
+}
+
+const allColorsAr = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
+const adultsSizes = ["XS","S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
+const kidsSizes = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
+
+let currentLang = localStorage.getItem("sprint_lang") || "ar";
+let productsData = []; 
+let userCart = [];
+let selectedColor = "";
+let selectedSize = "";
+let currentActiveFilter = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+    initTheme();
+    applyLanguage(currentLang);
+
+    // جلب المنتجات من قاعدة البيانات سحابياً
+    if (db) {
+        listenToCloudProducts();
+    } else {
+        renderCatalog("all");
+    }
+
+    const globalMask = document.getElementById("global-mask");
+    const cartDrawer = document.getElementById("cart-drawer");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    const themeToggleBtn = document.getElementById("theme-toggle-btn");
+    if(themeToggleBtn) themeToggleBtn.addEventListener("click", toggleDarkMode);
+    
+    const langBtn = document.getElementById("lang-toggle-btn");
+    if (langBtn) langBtn.addEventListener("click", toggleLanguage);
+
+    const cartOpenBtn = document.getElementById("cart-open-btn");
+    if(cartOpenBtn) cartOpenBtn.addEventListener("click", () => openDrawer(cartDrawer));
+
+    const cartCloseBtn = document.getElementById("cart-close-btn");
+    if(cartCloseBtn) cartCloseBtn.addEventListener("click", () => closeDrawers());
+
+    const menuOpenBtn = document.getElementById("menu-open-btn");
+    if(menuOpenBtn) menuOpenBtn.addEventListener("click", () => openDrawer(mobileMenu));
+
+    const menuCloseBtn = document.getElementById("menu-close-btn");
+    if(menuCloseBtn) menuCloseBtn.addEventListener("click", () => closeDrawers());
+
+    if(globalMask) globalMask.addEventListener("click", () => closeDrawers());
+
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    if(modalCloseBtn) {
+        modalCloseBtn.addEventListener("click", () => {
+            document.getElementById("product-modal").classList.remove("popup-open");
+            if(globalMask) globalMask.classList.remove("show");
+            setTimeout(() => document.getElementById("product-modal").style.display = "none", 400);
+        });
+    }
+
+    const contactForm = document.getElementById("contact-submit-form");
+    if (contactForm) {
+        contactForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            alert(currentLang === 'ar' ? "تم إرسال رسالتك بنجاح!" : "Your message has been sent successfully!");
+            contactForm.reset();
+        });
+    }
+});
+
+// الاتصال المباشر وقراءة المنتجات من قاعدة البيانات وتحويلها لمصفوفة
+function listenToCloudProducts() {
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            // إذا كانت المخزنة كـ كائنات مرتبطة بمفاتيح أو مصفوفة عادية
+            productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+        } else {
+            productsData = [];
+        }
+        renderCatalog(currentActiveFilter);
+    }, (error) => {
+        console.error("Cloud fetch error:", error);
+        renderCatalog(currentActiveFilter);
+    });
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem("sprint_theme");
+    const themeIcon = document.getElementById("theme-icon");
+    if (savedTheme === "light") {
+        document.body.classList.remove("dark-theme");
+        if (themeIcon) themeIcon.className = "fa-solid fa-moon";
+    } else {
+        document.body.classList.add("dark-theme");
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun";
+    }
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    const themeIcon = document.getElementById("theme-icon");
+    body.classList.toggle("dark-theme");
+    if (body.classList.contains("dark-theme")) {
+        localStorage.setItem("sprint_theme", "dark");
+        if(themeIcon) themeIcon.className = "fa-solid fa-sun";
+    } else {
+        localStorage.setItem("sprint_theme", "light");
+        if(themeIcon) themeIcon.className = "fa-solid fa-moon";
+    }
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === "ar" ? "en" : "ar";
+    localStorage.setItem("sprint_lang", currentLang);
+    applyLanguage(currentLang);
+    renderCatalog(currentActiveFilter);
+    updateCartUI();
+}
+
+function applyLanguage(lang) {
+    const htmlTag = document.documentElement;
+    htmlTag.setAttribute("lang", lang);
+    htmlTag.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    const langBtnText = document.getElementById("lang-btn-text");
+    if (langBtnText) langBtnText.innerText = lang === "ar" ? "English" : "عربي";
+}
+
+function openDrawer(drawerElement) {
+    const mask = document.getElementById("global-mask");
+    if(mask && drawerElement) {
+        mask.style.display = "block";
+        setTimeout(() => {
+            mask.classList.add("show");
+            if (drawerElement.id === "cart-drawer") drawerElement.classList.add("drawer-open");
+            if (drawerElement.id === "mobile-menu") drawerElement.classList.add("menu-open");
+        }, 10);
+    }
+}
+
+function closeDrawers() {
+    const mask = document.getElementById("global-mask");
+    const cartDrawer = document.getElementById("cart-drawer");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const modal = document.getElementById("product-modal");
+
+    if(cartDrawer) cartDrawer.classList.remove("drawer-open");
+    if(mobileMenu) mobileMenu.classList.remove("menu-open");
+    if(modal) modal.classList.remove("popup-open");
+    if(mask) mask.classList.remove("show");
+    setTimeout(() => {
+        if(mask) mask.style.display = "none";
+        if(modal) modal.style.display = "none";
+    }, 400);
+}
+
+window.navigateTo = function(pageId) {
+    const allPages = document.querySelectorAll(".page");
+    allPages.forEach(page => page.classList.remove("active-page"));
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add("active-page");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    closeDrawers();
+};
+
+window.openCategoryTab = function(catId) {
+    navigateTo('shop-page');
+    window.filterShop(catId);
+};
+
+window.filterShop = function(catId) {
+    currentActiveFilter = catId;
+    const tabs = document.querySelectorAll(".filter-tabs .tab");
+    tabs.forEach(tab => tab.classList.remove("active"));
+    const activeTab = document.getElementById(`tab-${catId}`);
+    if (activeTab) activeTab.classList.add("active");
+    renderCatalog(catId);
+};
+
+function renderCatalog(filter) {
+    currentActiveFilter = filter;
+    const wrapper = document.getElementById("shop-products-wrap");
+    if (!wrapper) return;
+    wrapper.innerHTML = "";
+
+    const filteredProducts = filter === "all" 
+        ? productsData 
+        : productsData.filter(p => String(p.category) === String(filter));
+
+    if (filteredProducts.length === 0) {
+        wrapper.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم حالياً ✨' : 'No products available in this section yet ✨'}</p>`;
+        return;
+    }
+
+    filteredProducts.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        // جعل كارت المنتج قابلاً للنقر بالكامل لفتح العرض السريع
+        card.onclick = () => openQuickView(product.id);
+        
+        let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
+        
+        card.innerHTML = `
+            ${badgeHtml}
+            <div class="p-img-box">
+                <img src="${product.img}" alt="${product.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
+            </div>
+            <div class="p-info">
+                <span class="p-cat">${product.type || 'تيشيرت'}</span>
+                <h3 class="p-title">${product.title}</h3>
+                <div class="p-price-row">
+                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>
+                    ${product.oldPrice ? `<span class="p-old-price">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>` : ''}
+                </div>
+            </div>
+        `;
+        wrapper.appendChild(card);
+    });
+}
+
+window.openQuickView = function(productId) {
+    const product = productsData.find(p => String(p.id) === String(productId));
+    if (!product) return;
+
+    selectedColor = "";
+    selectedSize = "";
+
+    document.getElementById("m-title-val").innerText = product.title;
+    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}`;
+    document.getElementById("m-type-val").innerText = product.type || "تيشيرت قطن";
+    document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
+    document.getElementById("m-img-val").src = product.img;
+
+    const colorsWrap = document.getElementById("m-colors-options");
+    colorsWrap.innerHTML = "";
+    allColorsAr.forEach(color => {
+        const box = document.createElement("button");
+        box.className = "option-box";
+        box.innerText = color;
+        box.onclick = () => {
+            document.querySelectorAll("#m-colors-options .option-box").forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedColor = color;
+        };
+        colorsWrap.appendChild(box);
+    });
+
+    const sizesWrap = document.getElementById("m-sizes-options");
+    sizesWrap.innerHTML = "";
+    const activeSizes = String(product.category) === "3" ? kidsSizes : adultsSizes;
+    activeSizes.forEach(size => {
+        const box = document.createElement("button");
+        box.className = "option-box";
+        box.innerText = size;
+        box.onclick = () => {
+            document.querySelectorAll("#m-sizes-options .option-box").forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedSize = size;
+        };
+        sizesWrap.appendChild(box);
+    });
+
+    const addBtn = document.getElementById("m-add-btn");
+    addBtn.onclick = () => {
+        if (!selectedColor) { alert(currentLang === 'ar' ? "من فضلك اختر اللون أولاً!" : "Please choose a color first!"); return; }
+        if (!selectedSize) { alert(currentLang === 'ar' ? "من فضلك اختر المقاس المناسب أولاً!" : "Please choose a suitable size first!"); return; }
+        
+        executeAddToCart(product, selectedColor, selectedSize);
+        closeDrawers();
+    };
+
+    const mask = document.getElementById("global-mask");
+    const modal = document.getElementById("product-modal");
+    if(mask) mask.style.display = "block";
+    if(modal) modal.style.display = "block";
+    setTimeout(() => {
+        if(mask) mask.classList.add("show");
+        if(modal) modal.classList.add("popup-open");
+    }, 10);
+};
+
+function executeAddToCart(product, color, size) {
+    const cartItemId = `${product.id}-${color}-${size}`;
+    const existingItem = userCart.find(item => item.cartItemId === cartItemId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        userCart.push({
+            cartItemId: cartItemId,
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            img: product.img,
+            fabric: product.fabric,
+            color: color,
+            size: size,
+            quantity: 1
+        });
+    }
+    updateCartUI();
+}
+
+window.changeQty = function(cartItemId, change) {
+    const item = userCart.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+    item.quantity += change;
+    if (item.quantity <= 0) {
+        userCart = userCart.filter(item => item.cartItemId !== cartItemId);
+    }
+    updateCartUI();
+};
+
+window.removeCartItem = function(cartItemId) {
+    userCart = userCart.filter(item => item.cartItemId !== cartItemId);
+    updateCartUI();
+};
+
+function updateCartUI() {
+    const container = document.getElementById("cart-items-container");
+    const badgeCount = document.getElementById("cart-badge-count");
+    const totalValue = document.getElementById("cart-total-value");
+    
+    if (!container) return;
+    container.innerHTML = "";
+
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    if (userCart.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);"><p>${currentLang === 'ar' ? 'حقيبة التسوق فارغة حالياً' : 'Your shopping cart is currently empty'}</p></div>`;
+    } else {
+        userCart.forEach(item => {
+            totalItems += item.quantity;
+            totalPrice += (item.price * item.quantity);
+
+            const row = document.createElement("div");
+            row.className = "d-item";
+            row.innerHTML = `
+                <img class="d-img" src="${item.img}" alt="${item.title}">
+                <div class="d-details">
+                    <h4 class="d-title">${item.title}</h4>
+                    <span class="d-meta-desc">Color: ${item.color} | Size: ${item.size}</span>
+                    <div class="d-price">${item.price} EGP</div>
+                    <div class="d-qty-ctrl">
+                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', 1)">+</button>
+                        <span>${item.quantity}</span>
+                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', -1)">-</button>
+                    </div>
+                    <span class="d-remove" onclick="removeCartItem('${item.cartItemId}')"><i class="fa-solid fa-trash-can"></i> حذف</span>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    if(badgeCount) badgeCount.innerText = totalItems;
+    if(totalValue) totalValue.innerText = `${totalPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}`;
+}
+
+window.triggerCheckout = function() {
+    if (userCart.length === 0) {
+        alert(currentLang === 'ar' ? "سلة المشتريات فارغة!" : "Cart is empty!");
+        return;
+    }
+    const customerName = document.getElementById("customer-name").value.trim();
+    const customerAddress = document.getElementById("customer-address").value.trim();
+    const customerPhone = document.getElementById("customer-phone").value.trim();
+
+    if (!customerName || !customerAddress || !customerPhone) {
+        alert(currentLang === 'ar' ? "من فضلك أدخل (الاسم، العنوان، ورقم الهاتف) لإتمام الطلب." : "Please enter Name, Address, and Phone.");
+        return;
+    }
+
+    const storeWhatsAppNumber = "201207878777"; 
+    let messageText = `🛍️ *Order from Sprint Egypt*\n👤 Name: ${customerName}\n📍 Address: ${customerAddress}\n📞 Phone: ${customerPhone}\n\n🛒 *Items:*\n`;
+
+    userCart.forEach((item, index) => {
+        messageText += `${index + 1}. ${item.title} (${item.color} - ${item.size}) x${item.quantity} - ${item.price} EGP\n`;
+    });
+
+    const finalTotal = userCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    messageText += `\n💰 *Total:* ${finalTotal} EGP`;
+
+    window.open(`https://api.whatsapp.com/send?phone=${storeWhatsAppNumber}&text=${encodeURIComponent(messageText)}`, "_blank");
+};

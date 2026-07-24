@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint Egypt | لوحة التحكم الأدمن السحابية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { max-width: 1300px; margin: 40px auto; padding: 20px; }
+        .login-box { max-width: 400px; margin: 80px auto; background: var(--bg-card); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-premium); text-align: center; }
+        .admin-panel { display: none; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--bg-card); border-radius: 8px; overflow: hidden; }
+        .admin-table th, .admin-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.85rem; vertical-align: middle; }
+        .admin-table th { background: var(--bg-dark-brand); color: #fff; }
+        .admin-input { width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-light); color: var(--text-main); font-size: 0.8rem; }
+        .btn-danger { background: #ff4d4d; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-save { background: #28a745; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .add-box { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 30px; }
+        .sync-badge { background: #28a745; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-bottom: 10px; }
+        .tag-input-box { font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; display: block; margin-top: 4px; }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-section" class="login-box">
+        <h2 style="margin-bottom: 20px;">تسجيل دخول الأدمن 🔐</h2>
+        <input type="text" id="admin-user" class="admin-input" placeholder="اسم المستخدم (Sprent)" style="margin-bottom: 12px; padding: 10px;">
+        <input type="password" id="admin-pass" class="admin-input" placeholder="كلمة المرور (Sprent2026)" style="margin-bottom: 15px; padding: 10px;">
+        <button class="black-btn" onclick="loginAdmin()" style="width: 100%; padding: 10px;">دخول</button>
+    </div>
+
+    <!-- لوحة التحكم الرئيسية -->
+    <div id="panel-section" class="admin-container admin-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2>لوحة إدارة متجر Sprint Egypt ⚡</h2>
+                <span class="sync-badge"><i class="fa-solid fa-cloud"></i> متصل بالسيرفر السحابي (Firebase) - الموقع خالي وجاهز</span>
+            </div>
+            <div>
+                <button class="btn-save" onclick="manualSaveToCloud()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة التعديلات يدوياً</button>
+                <button class="btn-danger" onclick="logoutAdmin()" style="margin-right: 10px;">تسجيل خروج</button>
+            </div>
+        </div>
+
+        <!-- نموذج إضافة منتج جديد متكامل -->
+        <div class="add-box">
+            <h3>إضافة منتج جديد بالسحابة (مع المقاسات والألوان والخصائص) ➕</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px;">
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">اسم المنتج:</label>
+                    <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت كاجوال أسود">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">السعر الحالي (ج.م):</label>
+                    <input type="number" id="new-price" class="admin-input" placeholder="350">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">السعر قبل الخصم (اختياري):</label>
+                    <input type="number" id="new-oldprice" class="admin-input" placeholder="450">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">القسم:</label>
+                    <select id="new-cat" class="admin-input" onchange="toggleSizeOptionsPreview()">
+                        <option value="1">رجالي</option>
+                        <option value="2">نسائي</option>
+                        <option value="3">أطفالي</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع المنتج:</label>
+                    <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت قطن">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع القماش:</label>
+                    <input type="text" id="new-fabric" class="admin-input" placeholder="قطن 100% مصري">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">مسار/رابط الصورة:</label>
+                    <input type="text" id="new-img" class="admin-input" placeholder="images/mens/item1.jpg">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">شارة المنتج (Tag):</label>
+                    <input type="text" id="new-tag" class="admin-input" placeholder="جديد / الأكثر مبيعاً / تخفيض">
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
+                <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px;">الألوان والمقاسات الافتراضية التي سيتم تطبيقها تلقائياً للمنتج:</p>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">🎨 الألوان: أسود، أبيض، كحلي، رمادي، زيتي، نبيتي، بيج.</span><br>
+                <span id="preview-sizes-text" style="font-size: 0.8rem; color: var(--text-muted);">📏 المقاسات: (رجالي/نسائي) M, L, XL, 2XL, 3XL</span>
+            </div>
+
+            <button class="black-btn" onclick="addNewProduct()" style="margin-top: 15px; width: 100%; padding: 12px; font-weight: bold;">إضافة ونشر المنتج فوراً للعملاء 🚀</button>
+        </div>
+
+        <!-- جدول التحكم في المنتجات الحالية -->
+        <h3>إدارة وتعديل المنتجات الحالية في السحابة 📦</h3>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>الاسم</th>
+                        <th>السعر</th>
+                        <th>قبل الخصم</th>
+                        <th>القسم</th>
+                        <th>النوع والقماش</th>
+                        <th>الشارة (Tag)</th>
+                        <th>الإجراءات / حفظ</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-products-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
+            authDomain: "sprent-cffc6.firebaseapp.com",
+            databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
+            projectId: "sprent-cffc6",
+            storageBucket: "sprent-cffc6.firebasestorage.app",
+            messagingSenderId: "858069126936",
+            appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
+            measurementId: "G-TEWN0253WH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const allColorsAr = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
+        const adultsSizes = ["XS","S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
+        const kidsSizes = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
+
+        let currentProducts = [];
+
+        window.loginAdmin = function() {
+            const user = document.getElementById("admin-user").value;
+            const pass = document.getElementById("admin-pass").value;
+
+            if(user === "Sprent" && pass === "Sprent2026") {
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("panel-section").style.display = "block";
+                listenToCloudProducts();
+            } else {
+                alert("بيانات الدخول غير صحيحة! تأكد من استخدام Sprent و Sprent2026");
+            }
+        };
+
+        window.logoutAdmin = function() {
+            document.getElementById("login-section").style.display = "block";
+            document.getElementById("panel-section").style.display = "none";
+        };
+
+        function listenToCloudProducts() {
+            const productsRef = ref(db, 'products');
+            onValue(productsRef, (snapshot) => {
+                const data = snapshot.val();
+                currentProducts = data ? Object.values(data) : [];
+                renderAdminTable();
+            });
+        }
+
+        window.toggleSizeOptionsPreview = function() {
+            const cat = document.getElementById("new-cat").value;
+            const previewText = document.getElementById("preview-sizes-text");
+            if(cat === "3") {
+                previewText.innerText = "📏 المقاسات (أطفالي): 2, 4, 6, 8, 10, 12, 14";
+            } else {
+                previewText.innerText = "📏 المقاسات (رجالي/نسائي): M, L, XL, 2XL, 3XL";
+            }
+        };
+
+        function renderAdminTable() {
+            const list = document.getElementById("admin-products-list");
+            list.innerHTML = "";
+
+            if(currentProducts.length === 0) {
+                list.innerHTML = `<tr><td colspan="8" style="padding: 30px; color: var(--text-muted);">الموقع خالي تماماً حالياً. ابدأ بإضافة منتجاتك الجديدة من النموذج بالأعلى 🛒✨</td></tr>`;
+                return;
+            }
+
+            currentProducts.forEach((product, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><img src="${product.img}" width="45" height="45" style="object-fit:cover; border-radius:6px; border:1px solid var(--border);"></td>
+                    <td><input type="text" class="admin-input" value="${product.title || ''}" onchange="updateProductField(${index}, 'title', this.value)"></td>
+                    <td><input type="number" class="admin-input" value="${product.price || 0}" onchange="updateProductField(${index}, 'price', Number(this.value))"></td>
+                    <td><input type="number" class="admin-input" value="${product.oldPrice || 0}" onchange="updateProductField(${index}, 'oldPrice', Number(this.value))"></td>
+                    <td>
+                        <select class="admin-input" onchange="updateProductCategory(${index}, this.value)">
+                            <option value="1" ${product.category == '1' ? 'selected' : ''}>رجالي</option>
+                            <option value="2" ${product.category == '2' ? 'selected' : ''}>نسائي</option>
+                            <option value="3" ${product.category == '3' ? 'selected' : ''}>أطفالي</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="admin-input" value="${product.type || ''}" placeholder="النوع" onchange="updateProductField(${index}, 'type', this.value)" style="margin-bottom:4px;">
+                        <input type="text" class="admin-input" value="${product.fabric || ''}" placeholder="القماش" onchange="updateProductField(${index}, 'fabric', this.value)">
+                    </td>
+                    <td><input type="text" class="admin-input" value="${product.tag || ''}" placeholder="جديد / تخفيض" onchange="updateProductField(${index}, 'tag', this.value)"></td>
+                    <td>
+                        <div style="display: flex; gap: 5px; justify-content: center;">
+                            <button class="btn-save" onclick="saveSingleProduct(${index})" title="حفظ هذا المنتج فقط"><i class="fa-solid fa-check"></i></button>
+                            <button class="btn-danger" onclick="deleteProduct(${index})" title="حذف المنتج"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        window.updateProductField = function(index, key, value) {
+            currentProducts[index][key] = value;
+        };
+
+        window.updateProductCategory = function(index, catVal) {
+            currentProducts[index].category = catVal;
+            currentProducts[index].sizes = (String(catVal) === "3") ? kidsSizes : adultsSizes;
+            saveToFirebaseSilently();
+        };
+
+        window.addNewProduct = function() {
+            const title = document.getElementById("new-title").value.trim();
+            const price = Number(document.getElementById("new-price").value);
+            const oldPrice = Number(document.getElementById("new-oldprice").value);
+            const category = document.getElementById("new-cat").value;
+            const type = document.getElementById("new-type").value.trim() || "تيشيرت";
+            const fabric = document.getElementById("new-fabric").value.trim() || "قطن عالي الجودة";
+            const img = document.getElementById("new-img").value.trim();
+            const tag = document.getElementById("new-tag").value.trim();
+
+            if(!title || !price || !img) {
+                alert("من فضلك أدخل البيانات الأساسية على الأقل (اسم المنتج، السعر، ومسار الصورة)!");
+                return;
+            }
+
+            const newProd = {
+                id: Date.now(),
+                category: category,
+                tag: tag || "جديد",
+                tagClass: "hot",
+                title: title,
+                price: price,
+                oldPrice: oldPrice || price,
+                img: img,
+                type: type,
+                fabric: fabric,
+                colors: allColorsAr, // ✅ التصحيح هنا
+                sizes: (String(category) === "3") ? kidsSizes : adultsSizes
+            };
+
+            currentProducts.push(newProd);
+            saveToFirebaseWithAlert("تم إضافة المنتج ونشره للزبائن بنجاح! 🚀");
+
+            // تصفير الحقول
+            document.getElementById("new-title").value = "";
+            document.getElementById("new-price").value = "";
+            document.getElementById("new-oldprice").value = "";
+            document.getElementById("new-type").value = "";
+            document.getElementById("new-fabric").value = "";
+            document.getElementById("new-img").value = "";
+            document.getElementById("new-tag").value = "";
+        };
+
+        window.saveSingleProduct = function(index) {
+            saveToFirebaseWithAlert(`تم حفظ التعديلات الخاصة بالمنتج (${currentProducts[index].title}) بنجاح! ✅`);
+        };
+
+        window.deleteProduct = function(index) {
+            if(confirm("هل أنت متأكد من حذف هذا المنتج نهائياً من السيرفر لكل الزبائن؟")) {
+                currentProducts.splice(index, 1);
+                saveToFirebaseWithAlert("تم حذف المنتج بنجاح وتحديث الموقع!");
+            }
+        };
+
+        window.manualSaveToCloud = function() {
+            saveToFirebaseWithAlert("تم حفظ جميع التعديلات والمنتجات في السيرفر السحابي بنجاح! ☁️");
+        };
+
+        function saveToFirebaseSilently() {
+            set(ref(db, 'products'), currentProducts).catch(err => console.error(err));
+        }
+
+        function saveToFirebaseWithAlert(msg) {
+            set(ref(db, 'products'), currentProducts)
+                .then(() => {
+                    alert(msg);
+                })
+                .catch((error) => {
+                    console.error("خطأ في الحفظ:", error);
+                    alert("حدث خطأ أثناء الاتصال بالسيرفر، تأكد من الإنترنت.");
+                });
+        }
+    </script>
+</body>
+</html>
