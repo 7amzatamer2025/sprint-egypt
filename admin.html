@@ -3,169 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم متجر Sprint Egypt</title>
+    <title>لوحة التحكم الاحترافية - Sprint Egypt</title>
+    <!-- استدعاء خط Cairo والايقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
+            --primary-bg: #0b0f19;
+            --card-bg: #131b2e;
+            --border-color: #1e293b;
+            --accent-cyan: #00d2ff;
+            --accent-blue: #3a7bd5;
+            --text-main: #ffffff;
             --text-muted: #94a3b8;
-            --accent-color: #007bff;
-            --border-color: #334155;
+            --danger: #ff4757;
+            --success: #2ed573;
         }
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
         }
-        .admin-container {
-            max-width: 1000px;
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 15px;
+        }
+
+        .admin-wrapper {
+            max-width: 1100px;
             margin: 0 auto;
         }
-        h1, h3 {
-            color: var(--text-color);
+
+        /* رأس الصفحة */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+        }
+
+        .admin-header h1 i {
+            color: var(--accent-cyan);
+        }
+
+        .back-site-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .back-site-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* بطاقات الأقسام */
+        .admin-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .admin-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        /* شبكة الحقول */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
         .admin-input {
             width: 100%;
-            padding: 10px;
-            background: var(--bg-color);
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            box-sizing: border-box;
+            color: var(--text-main);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
         }
-        .admin-opt-btn {
-            padding: 6px 14px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-color);
-            color: var(--text-color);
+
+        .admin-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.15);
+        }
+
+        select.admin-input {
             cursor: pointer;
-            border-radius: 6px;
+        }
+
+        /* أزرار اختيار الألوان والمقاسات التفاعلية */
+        .options-section {
+            margin-top: 25px;
+        }
+
+        .options-section label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .opt-chip {
+            padding: 6px 14px;
+            background: var(--border-color);
+            color: var(--text-muted);
+            border: 1px solid transparent;
+            border-radius: 20px;
             font-size: 0.85rem;
+            cursor: pointer;
             transition: all 0.2s ease;
+            user-select: none;
         }
-        .admin-opt-btn.selected-opt {
-            background: var(--accent-color) !important;
-            border-color: var(--accent-color);
-            color: #fff !important;
-            font-weight: bold;
+
+        .opt-chip:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-main);
         }
-        .products-table {
+
+        .opt-chip.selected {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)) !important;
+            color: #ffffff !important;
+            border-color: transparent;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 210, 255, 0.3);
+        }
+
+        /* زر النشر الرئيسي */
+        .submit-btn {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 25px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            box-shadow: 0 6px 20px rgba(46, 213, 115, 0.3);
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* جدول المنتجات */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .admin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .products-table th, .products-table td {
-            padding: 12px;
             text-align: right;
+            margin-top: 10px;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 14px 16px;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.9rem;
         }
-        .products-table th {
-            background: rgba(0,0,0,0.2);
+
+        .admin-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.5);
         }
-        .delete-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+
+        .admin-table td img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .action-del-btn {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            padding: 6px 14px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .action-del-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* تخصيص شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
         }
     </style>
 </head>
 <body>
 
-<div class="admin-container">
-    <h1><i class="fa-solid fa-gauge-high"></i> لوحة تحكم Sprint Egypt</h1>
-    
-    <!-- نموذج إضافة منتج جديد -->
-    <div class="add-box" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h3><i class="fa-solid fa-plus-circle"></i> إضافة منتج جديد لسحابية Firebase</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">اسم المنتج:</label>
-                <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز">
+<div class="admin-wrapper">
+    <!-- رأس لوحة التحكم -->
+    <div class="admin-header">
+        <h1><i class="fa-solid fa-shield-halved"></i> لوحة تحكم Sprint Egypt</h1>
+        <a href="index.html" class="back-site-btn"><i class="fa-solid fa-globe"></i> زيارة المتجر</a>
+    </div>
+
+    <!-- بطاقة إضافة منتج -->
+    <div class="admin-card">
+        <h3><i class="fa-solid fa-circle-plus"></i> إضافة منتج جديد لسحابية Firebase</h3>
+        
+        <div class="form-grid" style="margin-top: 20px;">
+            <div class="form-group">
+                <label>اسم المنتج</label>
+                <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز راكون">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">سعر الجملة:</label>
+            <div class="form-group">
+                <label>سعر الجملة (ج.م)</label>
                 <input type="number" id="new-price" class="admin-input" placeholder="250">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">السعر القطاعي:</label>
+            <div class="form-group">
+                <label>السعر القطاعي (ج.م)</label>
                 <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">القسم:</label>
+            <div class="form-group">
+                <label>القسم</label>
                 <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
                     <option value="1">رجالي</option>
                     <option value="2" selected>نسائي</option>
                     <option value="3">أطفالي</option>
                 </select>
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">نوع المنتج:</label>
+            <div class="form-group">
+                <label>نوع المنتج</label>
                 <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">نوع القماش:</label>
+            <div class="form-group">
+                <label>نوع القماش</label>
                 <input type="text" id="new-fabric" class="admin-input" placeholder="قطن عالي الجودة">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">رابط الصورة:</label>
-                <input type="text" id="new-img" class="admin-input" placeholder="https://...">
+            <div class="form-group">
+                <label>رابط الصورة</label>
+                <input type="text" id="new-img" class="admin-input" placeholder="https://images.unsplash.com/...">
             </div>
-            <div>
-                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">شارة المنتج (Tag):</label>
+            <div class="form-group">
+                <label>شارة المنتج (Tag)</label>
                 <input type="text" id="new-tag" class="admin-input" placeholder="جديد / عرض خاص">
             </div>
         </div>
 
-        <!-- اختيار الألوان المتاحة بأزرار تفاعلية -->
-        <div style="margin-top: 20px;">
-            <label style="font-size: 0.95rem; display:block; margin-bottom:8px; font-weight:bold;">اختر الألوان المتاحة للمنتج:</label>
-            <div id="admin-colors-container" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        <!-- ألوان المنتج -->
+        <div class="options-section">
+            <label><i class="fa-solid fa-palette"></i> اختر الألوان المتاحة للمنتج:</label>
+            <div id="admin-colors-container" class="chips-container"></div>
         </div>
 
-        <!-- اختيار المقاسات المتاحة بأزرار تفاعلية -->
-        <div style="margin-top: 20px;">
-            <label style="font-size: 0.95rem; display:block; margin-bottom:8px; font-weight:bold;">اختر المقاسات المتاحة للمنتج:</label>
-            <div id="admin-sizes-container" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        <!-- مقاسات المنتج -->
+        <div class="options-section">
+            <label><i class="fa-solid fa-ruler-combined"></i> اختر المقاسات المتاحة للمنتج:</label>
+            <div id="admin-sizes-container" class="chips-container"></div>
         </div>
 
-        <button onclick="addNewProduct()" style="margin-top: 25px; background: var(--accent-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem;"><i class="fa-solid fa-cloud-arrow-up"></i> نشر المنتج على الموقع 🚀</button>
+        <button onclick="addNewProduct()" class="submit-btn"><i class="fa-solid fa-cloud-arrow-up"></i> نشر المنتج على الموقع</button>
     </div>
 
-    <!-- جدول عرض وإدارة المنتجات الحالية -->
-    <div style="background: var(--card-bg); padding: 20px; border-radius: 12px;">
-        <h3><i class="fa-solid fa-boxes-stacked"></i> المنتجات الحالية على الموقع</h3>
-        <div style="overflow-x: auto;">
-            <table class="products-table">
+    <!-- جدول المنتجات الحالية -->
+    <div class="admin-card">
+        <h3><i class="fa-solid fa-boxes-stacked"></i> المنتجات الحالية في السحابة</h3>
+        <div class="table-responsive">
+            <table class="admin-table">
                 <thead>
                     <tr>
                         <th>الصورة</th>
                         <th>اسم المنتج</th>
-                        <th>سعر الجملة</th>
+                        <th>الجملة</th>
                         <th>القطاعي</th>
                         <th>القسم</th>
-                        <th>إجراء</th>
+                        <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="admin-products-list">
-                    <!-- يتم جلب المنتجات هنا تلقائياً -->
+                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري تحميل المنتجات...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- كود جافاسكريبت لربط لوحة التحكم بـ Firebase -->
+<!-- السكريبت البرمجي للربط مع Firebase -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -195,12 +393,11 @@
         if(colorsWrap) {
             colorsWrap.innerHTML = "";
             allColorsAdmin.forEach(color => {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "admin-opt-btn color-opt";
-                btn.innerText = color;
-                btn.onclick = () => btn.classList.toggle("selected-opt");
-                colorsWrap.appendChild(btn);
+                const chip = document.createElement("div");
+                chip.className = "opt-chip color-opt";
+                chip.innerText = color;
+                chip.onclick = () => chip.classList.toggle("selected");
+                colorsWrap.appendChild(chip);
             });
         }
         updateAdminSizesOption();
@@ -214,16 +411,14 @@
         
         const targetSizes = (cat === "3") ? kidsSizesAdmin : adultsSizesAdmin;
         targetSizes.forEach(size => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "admin-opt-btn size-opt";
-            btn.innerText = size;
-            btn.onclick = () => btn.classList.toggle("selected-opt");
-            sizesWrap.appendChild(btn);
+            const chip = document.createElement("div");
+            chip.className = "opt-chip size-opt";
+            chip.innerText = size;
+            chip.onclick = () => chip.classList.toggle("selected");
+            sizesWrap.appendChild(chip);
         });
     }
 
-    // جلب المنتجات من سحابية Firebase لعرضها بالجدول
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
@@ -241,20 +436,20 @@
         tbody.innerHTML = "";
 
         if (currentProducts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">لا توجد منتجات حالياً</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 30px;">لا توجد منتجات مسجلة حالياً ✨</td></tr>`;
             return;
         }
 
-        currentProducts.forEach((product, index) => {
+        currentProducts.forEach((product) => {
             let catName = product.category === "1" ? "رجالي" : (product.category === "2" ? "نسائي" : "أطفالي");
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><img src="${product.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
-                <td>${product.title}</td>
-                <td>${product.price} ج.م</td>
-                <td>${product.oldPrice || '-'} ج.م</td>
+                <td><img src="${product.img}" alt="img" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'"></td>
+                <td style="font-weight: 600;">${product.title}</td>
+                <td style="color: var(--accent-cyan); font-weight: 700;">${product.price} ج.م</td>
+                <td style="color: var(--text-muted);">${product.oldPrice || '-'} ج.م</td>
                 <td>${catName}</td>
-                <td><button class="delete-btn" onclick="window.deleteProduct(${product.id})">حذف</button></td>
+                <td><button class="action-del-btn" onclick="window.deleteProduct(${product.id})"><i class="fa-solid fa-trash"></i> حذف</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -271,13 +466,13 @@
         const tag = document.getElementById("new-tag").value.trim();
 
         const selectedColors = [];
-        document.querySelectorAll(".color-opt.selected-opt").forEach(b => selectedColors.push(b.innerText));
+        document.querySelectorAll(".color-opt.selected").forEach(b => selectedColors.push(b.innerText));
 
         const selectedSizes = [];
-        document.querySelectorAll(".size-opt.selected-opt").forEach(b => selectedSizes.push(b.innerText));
+        document.querySelectorAll(".size-opt.selected").forEach(b => selectedSizes.push(b.innerText));
 
         if(!title || !price || !img) {
-            alert("من فضلك أدخل البيانات الأساسية (اسم المنتج، السعر، ورابط الصورة)!");
+            alert("من فضلك أدخل البيانات الأساسية المطلوبة (اسم المنتج، السعر، ورابط الصورة)!");
             return;
         }
 
@@ -301,7 +496,7 @@
     }
 
     window.deleteProduct = function(productId) {
-        if(confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+        if(confirm("هل أنت متأكد من رغبتك في حذف هذا المنتج؟")) {
             currentProducts = currentProducts.filter(p => Number(p.id) !== Number(productId));
             saveToFirebase("تم حذف المنتج بنجاح!");
         }
@@ -315,7 +510,7 @@
                 document.getElementById("new-price").value = "";
                 document.getElementById("new-oldprice").value = "";
                 document.getElementById("new-img").value = "";
-                document.querySelectorAll(".admin-opt-btn").forEach(b => b.classList.remove("selected-opt"));
+                document.querySelectorAll(".opt-chip").forEach(b => b.classList.remove("selected"));
             })
             .catch((error) => {
                 alert("حدث خطأ أثناء الحفظ: " + error.message);
