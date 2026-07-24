@@ -1,402 +1,329 @@
-/* ==========================================================================
-   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase
-   ========================================================================== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم متجر Sprint Egypt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #007bff;
+            --border-color: #334155;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1, h3 {
+            color: var(--text-color);
+        }
+        .admin-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .admin-opt-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .admin-opt-btn.selected-opt {
+            background: var(--accent-color) !important;
+            border-color: var(--accent-color);
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .products-table th, .products-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        .products-table th {
+            background: rgba(0,0,0,0.2);
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
-    authDomain: "sprent-cffc6.firebaseapp.com",
-    databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
-    projectId: "sprent-cffc6",
-    storageBucket: "sprent-cffc6.firebasestorage.app",
-    messagingSenderId: "858069126936",
-    appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
-    measurementId: "G-TEWN0253WH"
-};
-
-let db = null;
-try {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-} catch (e) {
-    console.error("Firebase Init Error:", e);
-}
-
-let currentLang = localStorage.getItem("sprint_lang") || "ar";
-let productsData = []; 
-let userCart = [];
-let selectedColor = "";
-let selectedSize = "";
-let currentActiveFilter = "all";
-
-document.addEventListener("DOMContentLoaded", () => {
-    initTheme();
-    applyLanguage(currentLang);
-
-    if (db) {
-        listenToCloudProducts();
-    } else {
-        renderCatalog("all");
-    }
-
-    const globalMask = document.getElementById("global-mask");
-    const cartDrawer = document.getElementById("cart-drawer");
-    const mobileMenu = document.getElementById("mobile-menu");
-
-    const themeToggleBtn = document.getElementById("theme-toggle-btn");
-    if(themeToggleBtn) themeToggleBtn.addEventListener("click", toggleDarkMode);
+<div class="admin-container">
+    <h1><i class="fa-solid fa-gauge-high"></i> لوحة تحكم Sprint Egypt</h1>
     
-    const langBtn = document.getElementById("lang-toggle-btn");
-    if (langBtn) langBtn.addEventListener("click", toggleLanguage);
+    <!-- نموذج إضافة منتج جديد -->
+    <div class="add-box" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3><i class="fa-solid fa-plus-circle"></i> إضافة منتج جديد لسحابية Firebase</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px;">
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">اسم المنتج:</label>
+                <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">سعر الجملة:</label>
+                <input type="number" id="new-price" class="admin-input" placeholder="250">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">السعر القطاعي:</label>
+                <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">القسم:</label>
+                <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
+                    <option value="1">رجالي</option>
+                    <option value="2" selected>نسائي</option>
+                    <option value="3">أطفالي</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">نوع المنتج:</label>
+                <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">نوع القماش:</label>
+                <input type="text" id="new-fabric" class="admin-input" placeholder="قطن عالي الجودة">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">رابط الصورة:</label>
+                <input type="text" id="new-img" class="admin-input" placeholder="https://...">
+            </div>
+            <div>
+                <label style="font-size: 0.85rem; display:block; margin-bottom:5px;">شارة المنتج (Tag):</label>
+                <input type="text" id="new-tag" class="admin-input" placeholder="جديد / عرض خاص">
+            </div>
+        </div>
 
-    const cartOpenBtn = document.getElementById("cart-open-btn");
-    if(cartOpenBtn) cartOpenBtn.addEventListener("click", () => openDrawer(cartDrawer));
+        <!-- اختيار الألوان المتاحة بأزرار تفاعلية -->
+        <div style="margin-top: 20px;">
+            <label style="font-size: 0.95rem; display:block; margin-bottom:8px; font-weight:bold;">اختر الألوان المتاحة للمنتج:</label>
+            <div id="admin-colors-container" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
 
-    const cartCloseBtn = document.getElementById("cart-close-btn");
-    if(cartCloseBtn) cartCloseBtn.addEventListener("click", () => closeDrawers());
+        <!-- اختيار المقاسات المتاحة بأزرار تفاعلية -->
+        <div style="margin-top: 20px;">
+            <label style="font-size: 0.95rem; display:block; margin-bottom:8px; font-weight:bold;">اختر المقاسات المتاحة للمنتج:</label>
+            <div id="admin-sizes-container" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
 
-    const menuOpenBtn = document.getElementById("menu-open-btn");
-    if(menuOpenBtn) menuOpenBtn.addEventListener("click", () => openDrawer(mobileMenu));
+        <button onclick="addNewProduct()" style="margin-top: 25px; background: var(--accent-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem;"><i class="fa-solid fa-cloud-arrow-up"></i> نشر المنتج على الموقع 🚀</button>
+    </div>
 
-    const menuCloseBtn = document.getElementById("menu-close-btn");
-    if(menuCloseBtn) menuCloseBtn.addEventListener("click", () => closeDrawers());
+    <!-- جدول عرض وإدارة المنتجات الحالية -->
+    <div style="background: var(--card-bg); padding: 20px; border-radius: 12px;">
+        <h3><i class="fa-solid fa-boxes-stacked"></i> المنتجات الحالية على الموقع</h3>
+        <div style="overflow-x: auto;">
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>اسم المنتج</th>
+                        <th>سعر الجملة</th>
+                        <th>القطاعي</th>
+                        <th>القسم</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-products-list">
+                    <!-- يتم جلب المنتجات هنا تلقائياً -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-    if(globalMask) globalMask.addEventListener("click", () => closeDrawers());
+<!-- كود جافاسكريبت لربط لوحة التحكم بـ Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const modalCloseBtn = document.getElementById("modal-close-btn");
-    if(modalCloseBtn) {
-        modalCloseBtn.addEventListener("click", () => {
-            document.getElementById("product-modal").classList.remove("popup-open");
-            if(globalMask) globalMask.classList.remove("show");
-            setTimeout(() => document.getElementById("product-modal").style.display = "none", 400);
+    const firebaseConfig = {
+        apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
+        authDomain: "sprent-cffc6.firebaseapp.com",
+        databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
+        projectId: "sprent-cffc6",
+        storageBucket: "sprent-cffc6.firebasestorage.app",
+        messagingSenderId: "858069126936",
+        appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
+        measurementId: "G-TEWN0253WH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const allColorsAdmin = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
+    const adultsSizesAdmin = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
+    const kidsSizesAdmin = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
+
+    let currentProducts = [];
+
+    function renderAdminOptions() {
+        const colorsWrap = document.getElementById("admin-colors-container");
+        if(colorsWrap) {
+            colorsWrap.innerHTML = "";
+            allColorsAdmin.forEach(color => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "admin-opt-btn color-opt";
+                btn.innerText = color;
+                btn.onclick = () => btn.classList.toggle("selected-opt");
+                colorsWrap.appendChild(btn);
+            });
+        }
+        updateAdminSizesOption();
+    }
+
+    window.updateAdminSizesOption = function() {
+        const cat = document.getElementById("new-cat").value;
+        const sizesWrap = document.getElementById("admin-sizes-container");
+        if(!sizesWrap) return;
+        sizesWrap.innerHTML = "";
+        
+        const targetSizes = (cat === "3") ? kidsSizesAdmin : adultsSizesAdmin;
+        targetSizes.forEach(size => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "admin-opt-btn size-opt";
+            btn.innerText = size;
+            btn.onclick = () => btn.classList.toggle("selected-opt");
+            sizesWrap.appendChild(btn);
         });
     }
 
-    const contactForm = document.getElementById("contact-submit-form");
-    if (contactForm) {
-        contactForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            alert(currentLang === 'ar' ? "تم إرسال رسالتك بنجاح!" : "Your message has been sent successfully!");
-            contactForm.reset();
-        });
-    }
-});
-
-function listenToCloudProducts() {
+    // جلب المنتجات من سحابية Firebase لعرضها بالجدول
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+            currentProducts = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
         } else {
-            productsData = [];
+            currentProducts = [];
         }
-        renderCatalog(currentActiveFilter);
-    }, (error) => {
-        console.error("Cloud fetch error:", error);
-        renderCatalog(currentActiveFilter);
-    });
-}
-
-function initTheme() {
-    const savedTheme = localStorage.getItem("sprint_theme");
-    const themeIcon = document.getElementById("theme-icon");
-    if (savedTheme === "light") {
-        document.body.classList.remove("dark-theme");
-        if (themeIcon) themeIcon.className = "fa-solid fa-moon";
-    } else {
-        document.body.classList.add("dark-theme");
-        if (themeIcon) themeIcon.className = "fa-solid fa-sun";
-    }
-}
-
-function toggleDarkMode() {
-    const body = document.body;
-    const themeIcon = document.getElementById("theme-icon");
-    body.classList.toggle("dark-theme");
-    if (body.classList.contains("dark-theme")) {
-        localStorage.setItem("sprint_theme", "dark");
-        if(themeIcon) themeIcon.className = "fa-solid fa-sun";
-    } else {
-        localStorage.setItem("sprint_theme", "light");
-        if(themeIcon) themeIcon.className = "fa-solid fa-moon";
-    }
-}
-
-function toggleLanguage() {
-    currentLang = currentLang === "ar" ? "en" : "ar";
-    localStorage.setItem("sprint_lang", currentLang);
-    applyLanguage(currentLang);
-    renderCatalog(currentActiveFilter);
-    updateCartUI();
-}
-
-function applyLanguage(lang) {
-    const htmlTag = document.documentElement;
-    htmlTag.setAttribute("lang", lang);
-    htmlTag.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
-    const langBtnText = document.getElementById("lang-btn-text");
-    if (langBtnText) langBtnText.innerText = lang === "ar" ? "English" : "عربي";
-}
-
-function openDrawer(drawerElement) {
-    const mask = document.getElementById("global-mask");
-    if(mask && drawerElement) {
-        mask.style.display = "block";
-        setTimeout(() => {
-            mask.classList.add("show");
-            if (drawerElement.id === "cart-drawer") drawerElement.classList.add("drawer-open");
-            if (drawerElement.id === "mobile-menu") drawerElement.classList.add("menu-open");
-        }, 10);
-    }
-}
-
-function closeDrawers() {
-    const mask = document.getElementById("global-mask");
-    const cartDrawer = document.getElementById("cart-drawer");
-    const mobileMenu = document.getElementById("mobile-menu");
-    const modal = document.getElementById("product-modal");
-
-    if(cartDrawer) cartDrawer.classList.remove("drawer-open");
-    if(mobileMenu) mobileMenu.classList.remove("menu-open");
-    if(modal) modal.classList.remove("popup-open");
-    if(mask) mask.classList.remove("show");
-    setTimeout(() => {
-        if(mask) mask.style.display = "none";
-        if(modal) modal.style.display = "none";
-    }, 400);
-}
-
-window.navigateTo = function(pageId) {
-    const allPages = document.querySelectorAll(".page");
-    allPages.forEach(page => page.classList.remove("active-page"));
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        targetPage.classList.add("active-page");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    closeDrawers();
-};
-
-window.openCategoryTab = function(catId) {
-    navigateTo('shop-page');
-    window.filterShop(catId);
-};
-
-window.filterShop = function(catId) {
-    currentActiveFilter = catId;
-    const tabs = document.querySelectorAll(".filter-tabs .tab");
-    tabs.forEach(tab => tab.classList.remove("active"));
-    const activeTab = document.getElementById(`tab-${catId}`);
-    if (activeTab) activeTab.classList.add("active");
-    renderCatalog(catId);
-};
-
-function renderCatalog(filter) {
-    currentActiveFilter = filter;
-    const wrapper = document.getElementById("shop-products-wrap");
-    if (!wrapper) return;
-    wrapper.innerHTML = "";
-
-    const filteredProducts = filter === "all" 
-        ? productsData 
-        : productsData.filter(p => String(p.category) === String(filter));
-
-    if (filteredProducts.length === 0) {
-        wrapper.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم حالياً ✨' : 'No products available in this section yet ✨'}</p>`;
-        return;
-    }
-
-    filteredProducts.forEach(product => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.onclick = () => openQuickView(product.id);
-        
-        let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
-        
-        card.innerHTML = `
-            ${badgeHtml}
-            <div class="p-img-box">
-                <img src="${product.img}" alt="${product.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
-            </div>
-            <div class="p-info">
-                <span class="p-cat">${product.type || 'تيشيرت'}</span>
-                <h3 class="p-title">${product.title}</h3>
-                <div class="p-price-row">
-                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
-                    ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
-                </div>
-            </div>
-        `;
-        wrapper.appendChild(card);
-    });
-}
-
-window.openQuickView = function(productId) {
-    const product = productsData.find(p => String(p.id) === String(productId));
-    if (!product) return;
-
-    selectedColor = "";
-    selectedSize = "";
-
-    document.getElementById("m-title-val").innerText = product.title;
-    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price} ج.م`;
-    document.getElementById("m-type-val").innerText = product.type || "تيشيرت قطن";
-    document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
-    document.getElementById("m-img-val").src = product.img;
-
-    const colorsWrap = document.getElementById("m-colors-options");
-    colorsWrap.innerHTML = "";
-    const productColors = product.colors || ["أسود", "أبيض"]; 
-    productColors.forEach(color => {
-        const box = document.createElement("button");
-        box.className = "option-box";
-        box.innerText = color;
-        box.onclick = () => {
-            document.querySelectorAll("#m-colors-options .option-box").forEach(b => b.classList.remove("selected"));
-            box.classList.add("selected");
-            selectedColor = color;
-        };
-        colorsWrap.appendChild(box);
+        renderAdminTable();
     });
 
-    const sizesWrap = document.getElementById("m-sizes-options");
-    sizesWrap.innerHTML = "";
-    const activeSizes = product.sizes || ["M", "L", "XL"];
-    activeSizes.forEach(size => {
-        const box = document.createElement("button");
-        box.className = "option-box";
-        box.innerText = size;
-        box.onclick = () => {
-            document.querySelectorAll("#m-sizes-options .option-box").forEach(b => b.classList.remove("selected"));
-            box.classList.add("selected");
-            selectedSize = size;
-        };
-        sizesWrap.appendChild(box);
-    });
+    function renderAdminTable() {
+        const tbody = document.getElementById("admin-products-list");
+        if(!tbody) return;
+        tbody.innerHTML = "";
 
-    const addBtn = document.getElementById("m-add-btn");
-    addBtn.onclick = () => {
-        if (!selectedColor) { alert(currentLang === 'ar' ? "من فضلك اختر اللون أولاً!" : "Please choose a color first!"); return; }
-        if (!selectedSize) { alert(currentLang === 'ar' ? "من فضلك اختر المقاس المناسب أولاً!" : "Please choose a suitable size first!"); return; }
-        
-        executeAddToCart(product, selectedColor, selectedSize);
-        closeDrawers();
-    };
+        if (currentProducts.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">لا توجد منتجات حالياً</td></tr>`;
+            return;
+        }
 
-    const mask = document.getElementById("global-mask");
-    const modal = document.getElementById("product-modal");
-    if(mask) mask.style.display = "block";
-    if(modal) modal.style.display = "block";
-    setTimeout(() => {
-        if(mask) mask.classList.add("show");
-        if(modal) modal.classList.add("popup-open");
-    }, 10);
-};
-
-function executeAddToCart(product, color, size) {
-    const cartItemId = `${product.id}-${color}-${size}`;
-    const existingItem = userCart.find(item => item.cartItemId === cartItemId);
-
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        userCart.push({
-            cartItemId: cartItemId,
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            img: product.img,
-            fabric: product.fabric,
-            color: color,
-            size: size,
-            quantity: 1
-        });
-    }
-    updateCartUI();
-}
-
-window.changeQty = function(cartItemId, change) {
-    const item = userCart.find(item => item.cartItemId === cartItemId);
-    if (!item) return;
-    item.quantity += change;
-    if (item.quantity <= 0) {
-        userCart = userCart.filter(item => item.cartItemId !== cartItemId);
-    }
-    updateCartUI();
-};
-
-window.removeCartItem = function(cartItemId) {
-    userCart = userCart.filter(item => item.cartItemId !== cartItemId);
-    updateCartUI();
-};
-
-function updateCartUI() {
-    const container = document.getElementById("cart-items-container");
-    const badgeCount = document.getElementById("cart-badge-count");
-    const totalValue = document.getElementById("cart-total-value");
-    
-    if (!container) return;
-    container.innerHTML = "";
-
-    let totalItems = 0;
-    let totalPrice = 0;
-
-    if (userCart.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);"><p>${currentLang === 'ar' ? 'حقيبة التسوق فارغة حالياً' : 'Your shopping cart is currently empty'}</p></div>`;
-    } else {
-        userCart.forEach(item => {
-            totalItems += item.quantity;
-            totalPrice += (item.price * item.quantity);
-
-            const row = document.createElement("div");
-            row.className = "d-item";
-            row.innerHTML = `
-                <img class="d-img" src="${item.img}" alt="${item.title}">
-                <div class="d-details">
-                    <h4 class="d-title">${item.title}</h4>
-                    <span class="d-meta-desc">Color: ${item.color} | Size: ${item.size}</span>
-                    <div class="d-price">${item.price} EGP</div>
-                    <div class="d-qty-ctrl">
-                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', 1)">+</button>
-                        <span>${item.quantity}</span>
-                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', -1)">-</button>
-                    </div>
-                    <span class="d-remove" onclick="removeCartItem('${item.cartItemId}')"><i class="fa-solid fa-trash-can"></i> حذف</span>
-                </div>
+        currentProducts.forEach((product, index) => {
+            let catName = product.category === "1" ? "رجالي" : (product.category === "2" ? "نسائي" : "أطفالي");
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><img src="${product.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                <td>${product.title}</td>
+                <td>${product.price} ج.م</td>
+                <td>${product.oldPrice || '-'} ج.م</td>
+                <td>${catName}</td>
+                <td><button class="delete-btn" onclick="window.deleteProduct(${product.id})">حذف</button></td>
             `;
-            container.appendChild(row);
+            tbody.appendChild(tr);
         });
     }
 
-    if(badgeCount) badgeCount.innerText = totalItems;
-    if(totalValue) totalValue.innerText = `${totalPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}`;
-}
+    window.addNewProduct = function() {
+        const title = document.getElementById("new-title").value.trim();
+        const price = Number(document.getElementById("new-price").value);
+        const oldPrice = Number(document.getElementById("new-oldprice").value);
+        const category = document.getElementById("new-cat").value;
+        const type = document.getElementById("new-type").value.trim() || "تيشيرت";
+        const fabric = document.getElementById("new-fabric").value.trim() || "قطن عالي الجودة";
+        const img = document.getElementById("new-img").value.trim();
+        const tag = document.getElementById("new-tag").value.trim();
 
-window.triggerCheckout = function() {
-    if (userCart.length === 0) {
-        alert(currentLang === 'ar' ? "سلة المشتريات فارغة!" : "Cart is empty!");
-        return;
+        const selectedColors = [];
+        document.querySelectorAll(".color-opt.selected-opt").forEach(b => selectedColors.push(b.innerText));
+
+        const selectedSizes = [];
+        document.querySelectorAll(".size-opt.selected-opt").forEach(b => selectedSizes.push(b.innerText));
+
+        if(!title || !price || !img) {
+            alert("من فضلك أدخل البيانات الأساسية (اسم المنتج، السعر، ورابط الصورة)!");
+            return;
+        }
+
+        const newProd = {
+            id: Date.now(),
+            category: category,
+            tag: tag || "جديد",
+            tagClass: "hot",
+            title: title,
+            price: price,
+            oldPrice: oldPrice || price,
+            img: img,
+            type: type,
+            fabric: fabric,
+            colors: selectedColors.length > 0 ? selectedColors : ["أسود", "أبيض"],
+            sizes: selectedSizes.length > 0 ? selectedSizes : ["M", "L", "XL"]
+        };
+
+        currentProducts.push(newProd);
+        saveToFirebase("تم نشر المنتج بنجاح بالمقاسات والألوان المحددة! 🚀");
     }
-    const customerName = document.getElementById("customer-name").value.trim();
-    const customerAddress = document.getElementById("customer-address").value.trim();
-    const customerPhone = document.getElementById("customer-phone").value.trim();
 
-    if (!customerName || !customerAddress || !customerPhone) {
-        alert(currentLang === 'ar' ? "من فضلك أدخل (الاسم، العنوان، ورقم الهاتف) لإتمام الطلب." : "Please enter Name, Address, and Phone.");
-        return;
+    window.deleteProduct = function(productId) {
+        if(confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+            currentProducts = currentProducts.filter(p => Number(p.id) !== Number(productId));
+            saveToFirebase("تم حذف المنتج بنجاح!");
+        }
     }
 
-    const storeWhatsAppNumber = "201207878777"; 
-    let messageText = `🛍️ *Order from Sprint Egypt*\n👤 Name: ${customerName}\n📍 Address: ${customerAddress}\n📞 Phone: ${customerPhone}\n\n🛒 *Items:*\n`;
+    function saveToFirebase(successMessage) {
+        set(ref(db, 'products'), currentProducts)
+            .then(() => {
+                alert(successMessage);
+                document.getElementById("new-title").value = "";
+                document.getElementById("new-price").value = "";
+                document.getElementById("new-oldprice").value = "";
+                document.getElementById("new-img").value = "";
+                document.querySelectorAll(".admin-opt-btn").forEach(b => b.classList.remove("selected-opt"));
+            })
+            .catch((error) => {
+                alert("حدث خطأ أثناء الحفظ: " + error.message);
+            });
+    }
 
-    userCart.forEach((item, index) => {
-        messageText += `${index + 1}. ${item.title} (${item.color} - ${item.size}) x${item.quantity} - ${item.price} EGP\n`;
-    });
+    document.addEventListener("DOMContentLoaded", renderAdminOptions);
+</script>
 
-    const finalTotal = userCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    messageText += `\n💰 *Total:* ${finalTotal} EGP`;
-
-    window.open(`https://api.whatsapp.com/send?phone=${storeWhatsAppNumber}&text=${encodeURIComponent(messageText)}`, "_blank");
-};
+</body>
+</html>
