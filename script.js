@@ -23,10 +23,6 @@ try {
     console.error("Firebase Init Error:", e);
 }
 
-const allColorsAr = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
-const adultsSizes = ["XS","S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
-const kidsSizes = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
-
 let currentLang = localStorage.getItem("sprint_lang") || "ar";
 let productsData = []; 
 let userCart = [];
@@ -228,7 +224,6 @@ function renderCatalog(filter) {
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title}</h3>
                 <div class="p-price-row">
-                    <!-- سعر الجملة والسعر القطاعي بجانبه بدون أي خط شطب -->
                     <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
                     ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
                 </div>
@@ -251,7 +246,6 @@ window.openQuickView = function(productId) {
     document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
     document.getElementById("m-img-val").src = product.img;
 
-    // عرض الألوان الخاصة بهذا المنتج فقط من قاعدة البيانات
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
     const productColors = product.colors || ["أسود", "أبيض"]; 
@@ -267,7 +261,6 @@ window.openQuickView = function(productId) {
         colorsWrap.appendChild(box);
     });
 
-    // عرض المقاسات الخاصة بهذا المنتج فقط من قاعدة البيانات
     const sizesWrap = document.getElementById("m-sizes-options");
     sizesWrap.innerHTML = "";
     const activeSizes = product.sizes || ["M", "L", "XL"];
