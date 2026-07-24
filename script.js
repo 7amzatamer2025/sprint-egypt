@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     applyLanguage(currentLang);
 
-    // جلب المنتجات من قاعدة البيانات سحابياً
     if (db) {
         listenToCloudProducts();
     } else {
@@ -88,13 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// الاتصال المباشر وقراءة المنتجات من قاعدة البيانات وتحويلها لمصفوفة
 function listenToCloudProducts() {
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
-            // إذا كانت المخزنة كـ كائنات مرتبطة بمفاتيح أو مصفوفة عادية
             productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
         } else {
             productsData = [];
@@ -231,7 +228,6 @@ function renderCatalog(filter) {
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title}</h3>
                 <div class="p-price-row">
-                    <!-- سعر الجملة هو السعر الأساسي البارز، والسعر القديم يمثل سعر القطعة الأساسي/قبل الخصم -->
                     <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP (Wholesale)'}</span>
                     ${product.oldPrice ? `<span class="p-old-price">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>` : ''}
                 </div>
@@ -239,6 +235,7 @@ function renderCatalog(filter) {
         `;
         wrapper.appendChild(card);
     });
+}
 
 window.openQuickView = function(productId) {
     const product = productsData.find(p => String(p.id) === String(productId));
@@ -253,10 +250,9 @@ window.openQuickView = function(productId) {
     document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
     document.getElementById("m-img-val").src = product.img;
 
-    // استبدال الألوان العامة بألوان المنتج المخزنة في قاعدة البيانات
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
-    const productColors = product.colors || allColorsAr; // ألوان المنتج أو الافتراضية
+    const productColors = product.colors || allColorsAr; 
     productColors.forEach(color => {
         const box = document.createElement("button");
         box.className = "option-box";
@@ -269,25 +265,9 @@ window.openQuickView = function(productId) {
         colorsWrap.appendChild(box);
     });
 
-    // استبدال المقاسات العامة بمقاسات المنتج المخزنة في قاعدة البيانات
     const sizesWrap = document.getElementById("m-sizes-options");
     sizesWrap.innerHTML = "";
     const activeSizes = product.sizes || (String(product.category) === "3" ? kidsSizes : adultsSizes);
-    activeSizes.forEach(size => {
-        const box = document.createElement("button");
-        box.className = "option-box";
-        box.innerText = size;
-        box.onclick = () => {
-            document.querySelectorAll("#m-sizes-options .option-box").forEach(b => b.classList.remove("selected"));
-            box.classList.add("selected");
-            selectedSize = size;
-        };
-        sizesWrap.appendChild(box);
-    });
-
-    const sizesWrap = document.getElementById("m-sizes-options");
-    sizesWrap.innerHTML = "";
-    const activeSizes = String(product.category) === "3" ? kidsSizes : adultsSizes;
     activeSizes.forEach(size => {
         const box = document.createElement("button");
         box.className = "option-box";
