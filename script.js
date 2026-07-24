@@ -218,7 +218,6 @@ function renderCatalog(filter) {
     filteredProducts.forEach(product => {
         const card = document.createElement("div");
         card.className = "product-card";
-        // جعل كارت المنتج قابلاً للنقر بالكامل لفتح العرض السريع
         card.onclick = () => openQuickView(product.id);
         
         let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
@@ -232,14 +231,14 @@ function renderCatalog(filter) {
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title}</h3>
                 <div class="p-price-row">
-                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>
+                    <!-- سعر الجملة هو السعر الأساسي البارز، والسعر القديم يمثل سعر القطعة الأساسي/قبل الخصم -->
+                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP (Wholesale)'}</span>
                     ${product.oldPrice ? `<span class="p-old-price">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>` : ''}
                 </div>
             </div>
         `;
         wrapper.appendChild(card);
     });
-}
 
 window.openQuickView = function(productId) {
     const product = productsData.find(p => String(p.id) === String(productId));
