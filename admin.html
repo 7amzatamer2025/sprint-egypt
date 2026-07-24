@@ -1,320 +1,402 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sprint Egypt | لوحة التحكم الأدمن السحابية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .admin-container { max-width: 1300px; margin: 40px auto; padding: 20px; }
-        .login-box { max-width: 400px; margin: 80px auto; background: var(--bg-card); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-premium); text-align: center; }
-        .admin-panel { display: none; }
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--bg-card); border-radius: 8px; overflow: hidden; }
-        .admin-table th, .admin-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.85rem; vertical-align: middle; }
-        .admin-table th { background: var(--bg-dark-brand); color: #fff; }
-        .admin-input { width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-light); color: var(--text-main); font-size: 0.8rem; }
-        .btn-danger { background: #ff4d4d; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-save { background: #28a745; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .add-box { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 30px; }
-        .sync-badge { background: #28a745; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-bottom: 10px; }
-        .tag-input-box { font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; display: block; margin-top: 4px; }
-    </style>
-</head>
-<body class="dark-theme">
+/* ==========================================================================
+   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase
+   ========================================================================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="login-section" class="login-box">
-        <h2 style="margin-bottom: 20px;">تسجيل دخول الأدمن 🔐</h2>
-        <input type="text" id="admin-user" class="admin-input" placeholder="اسم المستخدم (Sprint)" style="margin-bottom: 12px; padding: 10px;">
-        <input type="password" id="admin-pass" class="admin-input" placeholder="كلمة المرور (Sprint2026)" style="margin-bottom: 15px; padding: 10px;">
-        <button class="black-btn" onclick="loginAdmin()" style="width: 100%; padding: 10px;">دخول</button>
-    </div>
+const firebaseConfig = {
+    apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
+    authDomain: "sprent-cffc6.firebaseapp.com",
+    databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
+    projectId: "sprent-cffc6",
+    storageBucket: "sprent-cffc6.firebasestorage.app",
+    messagingSenderId: "858069126936",
+    appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
+    measurementId: "G-TEWN0253WH"
+};
 
-    <!-- لوحة التحكم الرئيسية -->
-    <div id="panel-section" class="admin-container admin-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <h2>لوحة إدارة متجر Sprint Egypt ⚡</h2>
-                <span class="sync-badge"><i class="fa-solid fa-cloud"></i> متصل بالسيرفر السحابي (Firebase) - الموقع خالي وجاهز</span>
+let db = null;
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+} catch (e) {
+    console.error("Firebase Init Error:", e);
+}
+
+let currentLang = localStorage.getItem("sprint_lang") || "ar";
+let productsData = []; 
+let userCart = [];
+let selectedColor = "";
+let selectedSize = "";
+let currentActiveFilter = "all";
+
+document.addEventListener("DOMContentLoaded", () => {
+    initTheme();
+    applyLanguage(currentLang);
+
+    if (db) {
+        listenToCloudProducts();
+    } else {
+        renderCatalog("all");
+    }
+
+    const globalMask = document.getElementById("global-mask");
+    const cartDrawer = document.getElementById("cart-drawer");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    const themeToggleBtn = document.getElementById("theme-toggle-btn");
+    if(themeToggleBtn) themeToggleBtn.addEventListener("click", toggleDarkMode);
+    
+    const langBtn = document.getElementById("lang-toggle-btn");
+    if (langBtn) langBtn.addEventListener("click", toggleLanguage);
+
+    const cartOpenBtn = document.getElementById("cart-open-btn");
+    if(cartOpenBtn) cartOpenBtn.addEventListener("click", () => openDrawer(cartDrawer));
+
+    const cartCloseBtn = document.getElementById("cart-close-btn");
+    if(cartCloseBtn) cartCloseBtn.addEventListener("click", () => closeDrawers());
+
+    const menuOpenBtn = document.getElementById("menu-open-btn");
+    if(menuOpenBtn) menuOpenBtn.addEventListener("click", () => openDrawer(mobileMenu));
+
+    const menuCloseBtn = document.getElementById("menu-close-btn");
+    if(menuCloseBtn) menuCloseBtn.addEventListener("click", () => closeDrawers());
+
+    if(globalMask) globalMask.addEventListener("click", () => closeDrawers());
+
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    if(modalCloseBtn) {
+        modalCloseBtn.addEventListener("click", () => {
+            document.getElementById("product-modal").classList.remove("popup-open");
+            if(globalMask) globalMask.classList.remove("show");
+            setTimeout(() => document.getElementById("product-modal").style.display = "none", 400);
+        });
+    }
+
+    const contactForm = document.getElementById("contact-submit-form");
+    if (contactForm) {
+        contactForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            alert(currentLang === 'ar' ? "تم إرسال رسالتك بنجاح!" : "Your message has been sent successfully!");
+            contactForm.reset();
+        });
+    }
+});
+
+function listenToCloudProducts() {
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+        } else {
+            productsData = [];
+        }
+        renderCatalog(currentActiveFilter);
+    }, (error) => {
+        console.error("Cloud fetch error:", error);
+        renderCatalog(currentActiveFilter);
+    });
+}
+
+function initTheme() {
+    const savedTheme = localStorage.getItem("sprint_theme");
+    const themeIcon = document.getElementById("theme-icon");
+    if (savedTheme === "light") {
+        document.body.classList.remove("dark-theme");
+        if (themeIcon) themeIcon.className = "fa-solid fa-moon";
+    } else {
+        document.body.classList.add("dark-theme");
+        if (themeIcon) themeIcon.className = "fa-solid fa-sun";
+    }
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    const themeIcon = document.getElementById("theme-icon");
+    body.classList.toggle("dark-theme");
+    if (body.classList.contains("dark-theme")) {
+        localStorage.setItem("sprint_theme", "dark");
+        if(themeIcon) themeIcon.className = "fa-solid fa-sun";
+    } else {
+        localStorage.setItem("sprint_theme", "light");
+        if(themeIcon) themeIcon.className = "fa-solid fa-moon";
+    }
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === "ar" ? "en" : "ar";
+    localStorage.setItem("sprint_lang", currentLang);
+    applyLanguage(currentLang);
+    renderCatalog(currentActiveFilter);
+    updateCartUI();
+}
+
+function applyLanguage(lang) {
+    const htmlTag = document.documentElement;
+    htmlTag.setAttribute("lang", lang);
+    htmlTag.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    const langBtnText = document.getElementById("lang-btn-text");
+    if (langBtnText) langBtnText.innerText = lang === "ar" ? "English" : "عربي";
+}
+
+function openDrawer(drawerElement) {
+    const mask = document.getElementById("global-mask");
+    if(mask && drawerElement) {
+        mask.style.display = "block";
+        setTimeout(() => {
+            mask.classList.add("show");
+            if (drawerElement.id === "cart-drawer") drawerElement.classList.add("drawer-open");
+            if (drawerElement.id === "mobile-menu") drawerElement.classList.add("menu-open");
+        }, 10);
+    }
+}
+
+function closeDrawers() {
+    const mask = document.getElementById("global-mask");
+    const cartDrawer = document.getElementById("cart-drawer");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const modal = document.getElementById("product-modal");
+
+    if(cartDrawer) cartDrawer.classList.remove("drawer-open");
+    if(mobileMenu) mobileMenu.classList.remove("menu-open");
+    if(modal) modal.classList.remove("popup-open");
+    if(mask) mask.classList.remove("show");
+    setTimeout(() => {
+        if(mask) mask.style.display = "none";
+        if(modal) modal.style.display = "none";
+    }, 400);
+}
+
+window.navigateTo = function(pageId) {
+    const allPages = document.querySelectorAll(".page");
+    allPages.forEach(page => page.classList.remove("active-page"));
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add("active-page");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    closeDrawers();
+};
+
+window.openCategoryTab = function(catId) {
+    navigateTo('shop-page');
+    window.filterShop(catId);
+};
+
+window.filterShop = function(catId) {
+    currentActiveFilter = catId;
+    const tabs = document.querySelectorAll(".filter-tabs .tab");
+    tabs.forEach(tab => tab.classList.remove("active"));
+    const activeTab = document.getElementById(`tab-${catId}`);
+    if (activeTab) activeTab.classList.add("active");
+    renderCatalog(catId);
+};
+
+function renderCatalog(filter) {
+    currentActiveFilter = filter;
+    const wrapper = document.getElementById("shop-products-wrap");
+    if (!wrapper) return;
+    wrapper.innerHTML = "";
+
+    const filteredProducts = filter === "all" 
+        ? productsData 
+        : productsData.filter(p => String(p.category) === String(filter));
+
+    if (filteredProducts.length === 0) {
+        wrapper.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم حالياً ✨' : 'No products available in this section yet ✨'}</p>`;
+        return;
+    }
+
+    filteredProducts.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.onclick = () => openQuickView(product.id);
+        
+        let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
+        
+        card.innerHTML = `
+            ${badgeHtml}
+            <div class="p-img-box">
+                <img src="${product.img}" alt="${product.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
             </div>
-            <div>
-                <button class="btn-save" onclick="manualSaveToCloud()"><i class="fa-solid fa-floppy-disk"></i> حفظ كافة التعديلات يدوياً</button>
-                <button class="btn-danger" onclick="logoutAdmin()" style="margin-right: 10px;">تسجيل خروج</button>
+            <div class="p-info">
+                <span class="p-cat">${product.type || 'تيشيرت'}</span>
+                <h3 class="p-title">${product.title}</h3>
+                <div class="p-price-row">
+                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
+                    ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
+                </div>
             </div>
-        </div>
+        `;
+        wrapper.appendChild(card);
+    });
+}
 
-        <!-- نموذج إضافة منتج جديد متكامل -->
-        <div class="add-box" style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-    <h3>إضافة منتج جديد</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px;">
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">اسم المنتج:</label>
-            <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">سعر الجملة:</label>
-            <input type="number" id="new-price" class="admin-input" placeholder="250">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">السعر القطاعي:</label>
-            <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">القسم:</label>
-            <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
-                <option value="1">رجالي</option>
-                <option value="2">نسائي</option>
-                <option value="3">أطفالي</option>
-            </select>
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع المنتج:</label>
-            <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">نوع القماش:</label>
-            <input type="text" id="new-fabric" class="admin-input" placeholder="قطن عالي الجودة">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">رابط الصورة:</label>
-            <input type="text" id="new-img" class="admin-input" placeholder="images/item.jpg">
-        </div>
-        <div>
-            <label style="font-size: 0.8rem; display:block; margin-bottom:4px;">شارة المنتج (Tag):</label>
-            <input type="text" id="new-tag" class="admin-input" placeholder="جديد / عرض خاص">
-        </div>
-    </div>
+window.openQuickView = function(productId) {
+    const product = productsData.find(p => String(p.id) === String(productId));
+    if (!product) return;
 
-    <!-- اختيار الألوان المتاحة عبر أزرار تفاعلية -->
-    <div style="margin-top: 15px;">
-        <label style="font-size: 0.9rem; display:block; margin-bottom:6px; font-weight:bold;">اختر الألوان المتاحة للمنتج:</label>
-        <div id="admin-colors-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <!-- سيتم تعبئتها تلقائياً بالسكريبت -->
-        </div>
-    </div>
+    selectedColor = "";
+    selectedSize = "";
 
-    <!-- اختيار المقاسات المتاحة عبر أزرار تفاعلية -->
-    <div style="margin-top: 15px;">
-        <label style="font-size: 0.9rem; display:block; margin-bottom:6px; font-weight:bold;">اختر المقاسات المتاحة للمنتج:</label>
-        <div id="admin-sizes-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <!-- سيتم تعبئتها تلقائياً حسب القسم (رجالي/نسائي/أطفالي) -->
-        </div>
-    </div>
+    document.getElementById("m-title-val").innerText = product.title;
+    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price} ج.م`;
+    document.getElementById("m-type-val").innerText = product.type || "تيشيرت قطن";
+    document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
+    document.getElementById("m-img-val").src = product.img;
 
-    <button onclick="addNewProduct()" style="margin-top: 20px; background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">نشر المنتج على الموقع 🚀</button>
-</div>
-
-        <!-- جدول التحكم في المنتجات الحالية -->
-        <h3>إدارة وتعديل المنتجات الحالية في السحابة 📦</h3>
-        <div style="overflow-x: auto;">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>الصورة</th>
-                        <th>الاسم</th>
-                        <th>السعر</th>
-                        <th>قبل الخصم</th>
-                        <th>القسم</th>
-                        <th>النوع والقماش</th>
-                        <th>الشارة (Tag)</th>
-                        <th>الإجراءات / حفظ</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-products-list"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQqBi4aKGjrbVjIzSvmscmAYSVGeUbfzg",
-            authDomain: "sprent-cffc6.firebaseapp.com",
-            databaseURL: "https://sprent-cffc6-default-rtdb.firebaseio.com",
-            projectId: "sprent-cffc6",
-            storageBucket: "sprent-cffc6.firebasestorage.app",
-            messagingSenderId: "858069126936",
-            appId: "1:858069126936:web:cab9d421a7ac4de14ed86d",
-            measurementId: "G-TEWN0253WH"
+    const colorsWrap = document.getElementById("m-colors-options");
+    colorsWrap.innerHTML = "";
+    const productColors = product.colors || ["أسود", "أبيض"]; 
+    productColors.forEach(color => {
+        const box = document.createElement("button");
+        box.className = "option-box";
+        box.innerText = color;
+        box.onclick = () => {
+            document.querySelectorAll("#m-colors-options .option-box").forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedColor = color;
         };
+        colorsWrap.appendChild(box);
+    });
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const allColorsAr = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
-        const adultsSizes = ["XS","S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
-        const kidsSizes = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
-
-        let currentProducts = [];
-
-        window.loginAdmin = function() {
-            const user = document.getElementById("admin-user").value;
-            const pass = document.getElementById("admin-pass").value;
-
-            if(user === "Sprint" && pass === "Sprint2026") {
-                document.getElementById("login-section").style.display = "none";
-                document.getElementById("panel-section").style.display = "block";
-                listenToCloudProducts();
-            } else {
-                alert("بيانات الدخول غير صحيحة! تأكد من استخدام Sprent و Sprent2026");
-            }
+    const sizesWrap = document.getElementById("m-sizes-options");
+    sizesWrap.innerHTML = "";
+    const activeSizes = product.sizes || ["M", "L", "XL"];
+    activeSizes.forEach(size => {
+        const box = document.createElement("button");
+        box.className = "option-box";
+        box.innerText = size;
+        box.onclick = () => {
+            document.querySelectorAll("#m-sizes-options .option-box").forEach(b => b.classList.remove("selected"));
+            box.classList.add("selected");
+            selectedSize = size;
         };
+        sizesWrap.appendChild(box);
+    });
 
-        window.logoutAdmin = function() {
-            document.getElementById("login-section").style.display = "block";
-            document.getElementById("panel-section").style.display = "none";
-        };
+    const addBtn = document.getElementById("m-add-btn");
+    addBtn.onclick = () => {
+        if (!selectedColor) { alert(currentLang === 'ar' ? "من فضلك اختر اللون أولاً!" : "Please choose a color first!"); return; }
+        if (!selectedSize) { alert(currentLang === 'ar' ? "من فضلك اختر المقاس المناسب أولاً!" : "Please choose a suitable size first!"); return; }
+        
+        executeAddToCart(product, selectedColor, selectedSize);
+        closeDrawers();
+    };
 
-        function listenToCloudProducts() {
-            const productsRef = ref(db, 'products');
-            onValue(productsRef, (snapshot) => {
-                const data = snapshot.val();
-                currentProducts = data ? Object.values(data) : [];
-                renderAdminTable();
-            });
-        }
+    const mask = document.getElementById("global-mask");
+    const modal = document.getElementById("product-modal");
+    if(mask) mask.style.display = "block";
+    if(modal) modal.style.display = "block";
+    setTimeout(() => {
+        if(mask) mask.classList.add("show");
+        if(modal) modal.classList.add("popup-open");
+    }, 10);
+};
 
-        window.toggleSizeOptionsPreview = function() {
-            const cat = document.getElementById("new-cat").value;
-            const previewText = document.getElementById("preview-sizes-text");
-            if(cat === "3") {
-                previewText.innerText = "📏 المقاسات (أطفالي): 2, 4, 6, 8, 10, 12, 14";
-            } else {
-                previewText.innerText = "📏 المقاسات (رجالي/نسائي): M, L, XL, 2XL, 3XL";
-            }
-        };
+function executeAddToCart(product, color, size) {
+    const cartItemId = `${product.id}-${color}-${size}`;
+    const existingItem = userCart.find(item => item.cartItemId === cartItemId);
 
-        function renderAdminTable() {
-            const list = document.getElementById("admin-products-list");
-            list.innerHTML = "";
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        userCart.push({
+            cartItemId: cartItemId,
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            img: product.img,
+            fabric: product.fabric,
+            color: color,
+            size: size,
+            quantity: 1
+        });
+    }
+    updateCartUI();
+}
 
-            if(currentProducts.length === 0) {
-                list.innerHTML = `<tr><td colspan="8" style="padding: 30px; color: var(--text-muted);">الموقع خالي تماماً حالياً. ابدأ بإضافة منتجاتك الجديدة من النموذج بالأعلى 🛒✨</td></tr>`;
-                return;
-            }
+window.changeQty = function(cartItemId, change) {
+    const item = userCart.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+    item.quantity += change;
+    if (item.quantity <= 0) {
+        userCart = userCart.filter(item => item.cartItemId !== cartItemId);
+    }
+    updateCartUI();
+};
 
-            currentProducts.forEach((product, index) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td><img src="${product.img}" width="45" height="45" style="object-fit:cover; border-radius:6px; border:1px solid var(--border);"></td>
-                    <td><input type="text" class="admin-input" value="${product.title || ''}" onchange="updateProductField(${index}, 'title', this.value)"></td>
-                    <td><input type="number" class="admin-input" value="${product.price || 0}" onchange="updateProductField(${index}, 'price', Number(this.value))"></td>
-                    <td><input type="number" class="admin-input" value="${product.oldPrice || 0}" onchange="updateProductField(${index}, 'oldPrice', Number(this.value))"></td>
-                    <td>
-                        <select class="admin-input" onchange="updateProductCategory(${index}, this.value)">
-                            <option value="1" ${product.category == '1' ? 'selected' : ''}>رجالي</option>
-                            <option value="2" ${product.category == '2' ? 'selected' : ''}>نسائي</option>
-                            <option value="3" ${product.category == '3' ? 'selected' : ''}>أطفالي</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" class="admin-input" value="${product.type || ''}" placeholder="النوع" onchange="updateProductField(${index}, 'type', this.value)" style="margin-bottom:4px;">
-                        <input type="text" class="admin-input" value="${product.fabric || ''}" placeholder="القماش" onchange="updateProductField(${index}, 'fabric', this.value)">
-                    </td>
-                    <td><input type="text" class="admin-input" value="${product.tag || ''}" placeholder="جديد / تخفيض" onchange="updateProductField(${index}, 'tag', this.value)"></td>
-                    <td>
-                        <div style="display: flex; gap: 5px; justify-content: center;">
-                            <button class="btn-save" onclick="saveSingleProduct(${index})" title="حفظ هذا المنتج فقط"><i class="fa-solid fa-check"></i></button>
-                            <button class="btn-danger" onclick="deleteProduct(${index})" title="حذف المنتج"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                `;
-                list.appendChild(row);
-            });
-        }
+window.removeCartItem = function(cartItemId) {
+    userCart = userCart.filter(item => item.cartItemId !== cartItemId);
+    updateCartUI();
+};
 
-        window.updateProductField = function(index, key, value) {
-            currentProducts[index][key] = value;
-        };
+function updateCartUI() {
+    const container = document.getElementById("cart-items-container");
+    const badgeCount = document.getElementById("cart-badge-count");
+    const totalValue = document.getElementById("cart-total-value");
+    
+    if (!container) return;
+    container.innerHTML = "";
 
-        window.updateProductCategory = function(index, catVal) {
-            currentProducts[index].category = catVal;
-            currentProducts[index].sizes = (String(catVal) === "3") ? kidsSizes : adultsSizes;
-            saveToFirebaseSilently();
-        };
+    let totalItems = 0;
+    let totalPrice = 0;
 
-        window.addNewProduct = function() {
-            const title = document.getElementById("new-title").value.trim();
-            const price = Number(document.getElementById("new-price").value);
-            const oldPrice = Number(document.getElementById("new-oldprice").value);
-            const category = document.getElementById("new-cat").value;
-            const type = document.getElementById("new-type").value.trim() || "تيشيرت";
-            const fabric = document.getElementById("new-fabric").value.trim() || "قطن عالي الجودة";
-            const img = document.getElementById("new-img").value.trim();
-            const tag = document.getElementById("new-tag").value.trim();
-            
-            // قراءة الألوان والمقاسات وتحويلها إلى مصفوفة نصوص
-            const colorsInput = document.getElementById("new-colors").value;
-            const sizesInput = document.getElementById("new-sizes").value;
-            const customColors = colorsInput ? colorsInput.split(',').map(c => c.trim()).filter(Boolean) : allColorsAr;
-            const customSizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(Boolean) : adultsSizes;
+    if (userCart.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);"><p>${currentLang === 'ar' ? 'حقيبة التسوق فارغة حالياً' : 'Your shopping cart is currently empty'}</p></div>`;
+    } else {
+        userCart.forEach(item => {
+            totalItems += item.quantity;
+            totalPrice += (item.price * item.quantity);
 
-            if(!title || !price || !img) {
-                alert("من فضلك أدخل البيانات الأساسية على الأقل (اسم المنتج، السعر، ومسار الصورة)!");
-                return;
-            }
+            const row = document.createElement("div");
+            row.className = "d-item";
+            row.innerHTML = `
+                <img class="d-img" src="${item.img}" alt="${item.title}">
+                <div class="d-details">
+                    <h4 class="d-title">${item.title}</h4>
+                    <span class="d-meta-desc">Color: ${item.color} | Size: ${item.size}</span>
+                    <div class="d-price">${item.price} EGP</div>
+                    <div class="d-qty-ctrl">
+                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', 1)">+</button>
+                        <span>${item.quantity}</span>
+                        <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', -1)">-</button>
+                    </div>
+                    <span class="d-remove" onclick="removeCartItem('${item.cartItemId}')"><i class="fa-solid fa-trash-can"></i> حذف</span>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
 
-            const newProd = {
-                id: Date.now(),
-                category: category,
-                tag: tag || "جديد",
-                tagClass: "hot",
-                title: title,
-                price: price, // سعر الجملة
-                oldPrice: oldPrice || price, // السعر الأساسي/قبل الخصم
-                img: img,
-                type: type,
-                fabric: fabric,
-                colors: customColors,  // الألوان المخصصة لهذا المنتج فقط
-                sizes: customSizes     // المقاسات المخصصة لهذا المنتج فقط
-            };
+    if(badgeCount) badgeCount.innerText = totalItems;
+    if(totalValue) totalValue.innerText = `${totalPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}`;
+}
 
-            currentProducts.push(newProd);
-            saveToFirebaseWithAlert("تم إضافة المنتج ونشره للزبائن بنجاح مع ألوانه ومقاساته الخاصة! 🚀");
+window.triggerCheckout = function() {
+    if (userCart.length === 0) {
+        alert(currentLang === 'ar' ? "سلة المشتريات فارغة!" : "Cart is empty!");
+        return;
+    }
+    const customerName = document.getElementById("customer-name").value.trim();
+    const customerAddress = document.getElementById("customer-address").value.trim();
+    const customerPhone = document.getElementById("customer-phone").value.trim();
 
-            // تصفير الحقول
-            document.getElementById("new-title").value = "";
-            document.getElementById("new-price").value = "";
-            document.getElementById("new-oldprice").value = "";
-            document.getElementById("new-type").value = "";
-            document.getElementById("new-fabric").value = "";
-            document.getElementById("new-img").value = "";
-            document.getElementById("new-tag").value = "";
-        };
+    if (!customerName || !customerAddress || !customerPhone) {
+        alert(currentLang === 'ar' ? "من فضلك أدخل (الاسم، العنوان، ورقم الهاتف) لإتمام الطلب." : "Please enter Name, Address, and Phone.");
+        return;
+    }
 
-        window.saveSingleProduct = function(index) {
-            saveToFirebaseWithAlert(`تم حفظ التعديلات الخاصة بالمنتج (${currentProducts[index].title}) بنجاح! ✅`);
-        };
+    const storeWhatsAppNumber = "201207878777"; 
+    let messageText = `🛍️ *Order from Sprint Egypt*\n👤 Name: ${customerName}\n📍 Address: ${customerAddress}\n📞 Phone: ${customerPhone}\n\n🛒 *Items:*\n`;
 
-        window.deleteProduct = function(index) {
-            if(confirm("هل أنت متأكد من حذف هذا المنتج نهائياً من السيرفر لكل الزبائن؟")) {
-                currentProducts.splice(index, 1);
-                saveToFirebaseWithAlert("تم حذف المنتج بنجاح وتحديث الموقع!");
-            }
-        };
+    userCart.forEach((item, index) => {
+        messageText += `${index + 1}. ${item.title} (${item.color} - ${item.size}) x${item.quantity} - ${item.price} EGP\n`;
+    });
 
-        window.manualSaveToCloud = function() {
-            saveToFirebaseWithAlert("تم حفظ جميع التعديلات والمنتجات في السيرفر السحابي بنجاح! ☁️");
-        };
+    const finalTotal = userCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    messageText += `\n💰 *Total:* ${finalTotal} EGP`;
 
-        function saveToFirebaseSilently() {
-            set(ref(db, 'products'), currentProducts).catch(err => console.error(err));
-        }
-
-        function saveToFirebaseWithAlert(msg) {
-            set(ref(db, 'products'), currentProducts)
-                .then(() => {
-                    alert(msg);
-                })
-                .catch((error) => {
-                    console.error("خطأ في الحفظ:", error);
-                    alert("حدث خطأ أثناء الاتصال بالسيرفر، تأكد من الإنترنت.");
-                });
-        }
-    </script>
-</body>
-</html>
+    window.open(`https://api.whatsapp.com/send?phone=${storeWhatsAppNumber}&text=${encodeURIComponent(messageText)}`, "_blank");
+};
