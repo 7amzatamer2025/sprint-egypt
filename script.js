@@ -228,8 +228,9 @@ function renderCatalog(filter) {
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title}</h3>
                 <div class="p-price-row">
-                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP (Wholesale)'}</span>
-                    ${product.oldPrice ? `<span class="p-old-price">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}</span>` : ''}
+                    <!-- سعر الجملة والسعر القطاعي بجانبه بدون أي خط شطب -->
+                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
+                    ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
                 </div>
             </div>
         `;
@@ -245,14 +246,15 @@ window.openQuickView = function(productId) {
     selectedSize = "";
 
     document.getElementById("m-title-val").innerText = product.title;
-    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م' : 'EGP'}`;
+    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price} ج.م`;
     document.getElementById("m-type-val").innerText = product.type || "تيشيرت قطن";
     document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
     document.getElementById("m-img-val").src = product.img;
 
+    // عرض الألوان الخاصة بهذا المنتج فقط من قاعدة البيانات
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
-    const productColors = product.colors || allColorsAr; 
+    const productColors = product.colors || ["أسود", "أبيض"]; 
     productColors.forEach(color => {
         const box = document.createElement("button");
         box.className = "option-box";
@@ -265,9 +267,10 @@ window.openQuickView = function(productId) {
         colorsWrap.appendChild(box);
     });
 
+    // عرض المقاسات الخاصة بهذا المنتج فقط من قاعدة البيانات
     const sizesWrap = document.getElementById("m-sizes-options");
     sizesWrap.innerHTML = "";
-    const activeSizes = product.sizes || (String(product.category) === "3" ? kidsSizes : adultsSizes);
+    const activeSizes = product.sizes || ["M", "L", "XL"];
     activeSizes.forEach(size => {
         const box = document.createElement("button");
         box.className = "option-box";
