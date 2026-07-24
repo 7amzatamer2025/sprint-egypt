@@ -245,6 +245,12 @@
             const fabric = document.getElementById("new-fabric").value.trim() || "قطن عالي الجودة";
             const img = document.getElementById("new-img").value.trim();
             const tag = document.getElementById("new-tag").value.trim();
+            
+            // قراءة الألوان والمقاسات وتحويلها إلى مصفوفة نصوص
+            const colorsInput = document.getElementById("new-colors").value;
+            const sizesInput = document.getElementById("new-sizes").value;
+            const customColors = colorsInput ? colorsInput.split(',').map(c => c.trim()).filter(Boolean) : allColorsAr;
+            const customSizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(Boolean) : adultsSizes;
 
             if(!title || !price || !img) {
                 alert("من فضلك أدخل البيانات الأساسية على الأقل (اسم المنتج، السعر، ومسار الصورة)!");
@@ -257,17 +263,17 @@
                 tag: tag || "جديد",
                 tagClass: "hot",
                 title: title,
-                price: price,
-                oldPrice: oldPrice || price,
+                price: price, // سعر الجملة
+                oldPrice: oldPrice || price, // السعر الأساسي/قبل الخصم
                 img: img,
                 type: type,
                 fabric: fabric,
-                colors: allColorsAr, // ✅ التصحيح هنا
-                sizes: (String(category) === "3") ? kidsSizes : adultsSizes
+                colors: customColors,  // الألوان المخصصة لهذا المنتج فقط
+                sizes: customSizes     // المقاسات المخصصة لهذا المنتج فقط
             };
 
             currentProducts.push(newProd);
-            saveToFirebaseWithAlert("تم إضافة المنتج ونشره للزبائن بنجاح! 🚀");
+            saveToFirebaseWithAlert("تم إضافة المنتج ونشره للزبائن بنجاح مع ألوانه ومقاساته الخاصة! 🚀");
 
             // تصفير الحقول
             document.getElementById("new-title").value = "";
