@@ -1,5 +1,5 @@
 /* ==========================================================================
-   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase
+   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase (قراءة جميع الإعدادات)
    ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (db) {
         listenToCloudProducts();
-        listenToCloudSettings(); // الاستماع للتعديلات والإعدادات الحية من لوحة التحكم
+        listenToCloudSettings(); // جلب وقراءة جميع الإعدادات الحية للموقع
     } else {
         renderCatalog("all");
     }
@@ -100,13 +100,29 @@ function listenToCloudProducts() {
     });
 }
 
-// دالة جلب وسماع الإعدادات وصور الأقسام وتحديث واجهة المستخدم فورياً
+// دالة شاملة لقراءة وتطبيق كل إعدادات الموقع وتحديث العناصر ديناميكياً
 function listenToCloudSettings() {
     const settingsRef = ref(db, 'settings');
     onValue(settingsRef, (snapshot) => {
         const settings = snapshot.val();
         if (settings) {
-            // تحديث العناوين والوصف والبانر الرئيسي
+            // المرور على كل مفتاح في الإعدادات وتحديث العنصر المطابق له في الصفحة لو وُجد ID بنفس الاسم
+            Object.keys(settings).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    const value = settings[key];
+                    // إذا كان العنصر صورة (IMG) نحدث الـ src، وإلا نحدث الـ innerText أو innerHTML
+                    if (element.tagName === "IMG") {
+                        element.src = value;
+                    } else if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
+                        element.value = value;
+                    } else {
+                        element.innerText = value;
+                    }
+                }
+            });
+
+            // تحديثات مخصصة إضافية لو العناصر لها أسماء IDs مختلفة عن مفاتيح القاعدة
             if (settings.title && document.getElementById('hero-title')) {
                 document.getElementById('hero-title').innerText = settings.title;
             }
@@ -115,20 +131,6 @@ function listenToCloudSettings() {
             }
             if (settings.bannerImg && document.getElementById('hero-banner')) {
                 document.getElementById('hero-banner').src = settings.bannerImg;
-            }
-
-            // تحديث صور الأقسام (الباقدجات) في الصفحة الرئيسية
-            if (settings.catImg1 && document.getElementById('cat-img-1')) {
-                document.getElementById('cat-img-1').src = settings.catImg1;
-            }
-            if (settings.catImg2 && document.getElementById('cat-img-2')) {
-                document.getElementById('cat-img-2').src = settings.catImg2;
-            }
-            if (settings.catImg4 && document.getElementById('cat-img-4')) {
-                document.getElementById('cat-img-4').src = settings.catImg4;
-            }
-            if (settings.catImg3 && document.getElementById('cat-img-3')) {
-                document.getElementById('cat-img-3').src = settings.catImg3;
             }
         }
     }, (error) => {
