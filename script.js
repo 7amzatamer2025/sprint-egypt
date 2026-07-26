@@ -1,5 +1,5 @@
 /* ==========================================================================
-   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase (شامل التعديلات)
+   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase
    ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -24,18 +24,19 @@ try {
 }
 
 let currentLang = localStorage.getItem("sprint_lang") || "ar";
-window.productsData = []; 
+let productsData = []; 
 let userCart = [];
 let selectedColor = "";
 let selectedSize = "";
-window.currentActiveFilter = "all";
+let currentActiveFilter = "all";
 
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     applyLanguage(currentLang);
 
     if (db) {
-        listenToCloudData();
+        listenToCloudProducts();
+        listenToCloudSettings(); // الاستماع للتعديلات والإعدادات الحية من لوحة التحكم
     } else {
         renderCatalog("all");
     }
@@ -83,34 +84,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-/* الاستماع لقاعدة البيانات لتحديث العناوين، الصور، والمنتجات فورياً */
-function listenToCloudData() {
-    const rootRef = ref(db);
-    onValue(rootRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        
-        // 1. تحديث العناوين والصور الرئيسية من لوحة التحكم
-        if (data.settings) {
-            const titleEl = document.getElementById("dynamic-hero-title");
-            const descEl = document.getElementById("dynamic-hero-desc");
-            const bannerImgEl = document.getElementById("dynamic-banner-img");
-
-            if (titleEl && data.settings.title) titleEl.innerText = data.settings.title;
-            if (descEl && data.settings.desc) descEl.innerText = data.settings.desc;
-            if (bannerImgEl && data.settings.bannerImg) bannerImgEl.src = data.settings.bannerImg;
-        }
-
-        // 2. تحديث المنتجات
-        if (data.products) {
-            window.productsData = Array.isArray(data.products) ? data.products.filter(Boolean) : Object.values(data.products);
+function listenToCloudProducts() {
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
         } else {
-            window.productsData = [];
+            productsData = [];
         }
-        
-        renderCatalog(window.currentActiveFilter);
+        renderCatalog(currentActiveFilter);
     }, (error) => {
         console.error("Cloud fetch error:", error);
-        renderCatalog(window.currentActiveFilter);
+        renderCatalog(currentActiveFilter);
+    });
+}
+
+// دالة جلب وسماع الإعدادات وصور الأقسام وتحديث واجهة المستخدم فورياً
+function listenToCloudSettings() {
+    const settingsRef = ref(db, 'settings');
+    onValue(settingsRef, (snapshot) => {
+        const settings = snapshot.val();
+        if (settings) {
+            // تحديث العناوين والوصف والبانر الرئيسي
+            if (settings.title && document.getElementById('hero-title')) {
+                document.getElementById('hero-title').innerText = settings.title;
+            }
+            if (settings.desc && document.getElementById('hero-desc')) {
+                document.getElementById('hero-desc').innerText = settings.desc;
+            }
+            if (settings.bannerImg && document.getElementById('hero-banner')) {
+                document.getElementById('hero-banner').src = settings.bannerImg;
+            }
+
+            // تحديث صور الأقسام (الباقدجات) في الصفحة الرئيسية
+            if (settings.catImg1 && document.getElementById('cat-img-1')) {
+                document.getElementById('cat-img-1').src = settings.catImg1;
+            }
+            if (settings.catImg2 && document.getElementById('cat-img-2')) {
+                document.getElementById('cat-img-2').src = settings.catImg2;
+            }
+            if (settings.catImg4 && document.getElementById('cat-img-4')) {
+                document.getElementById('cat-img-4').src = settings.catImg4;
+            }
+            if (settings.catImg3 && document.getElementById('cat-img-3')) {
+                document.getElementById('cat-img-3').src = settings.catImg3;
+            }
+        }
+    }, (error) => {
+        console.error("Settings fetch error:", error);
     });
 }
 
@@ -143,7 +165,7 @@ function toggleLanguage() {
     currentLang = currentLang === "ar" ? "en" : "ar";
     localStorage.setItem("sprint_lang", currentLang);
     applyLanguage(currentLang);
-    renderCatalog(window.currentActiveFilter);
+    renderCatalog(currentActiveFilter);
     updateCartUI();
 }
 
@@ -200,7 +222,7 @@ window.openCategoryTab = function(catId) {
 };
 
 window.filterShop = function(catId) {
-    window.currentActiveFilter = catId;
+    currentActiveFilter = catId;
     const tabs = document.querySelectorAll(".filter-tabs .tab");
     tabs.forEach(tab => tab.classList.remove("active"));
     const activeTab = document.getElementById(`tab-${catId}`);
@@ -209,14 +231,14 @@ window.filterShop = function(catId) {
 };
 
 function renderCatalog(filter) {
-    window.currentActiveFilter = filter;
+    currentActiveFilter = filter;
     const wrapper = document.getElementById("shop-products-wrap");
     if (!wrapper) return;
     wrapper.innerHTML = "";
 
     const filteredProducts = filter === "all" 
-        ? window.productsData 
-        : window.productsData.filter(p => String(p.category) === String(filter));
+        ? productsData 
+        : productsData.filter(p => String(p.category) === String(filter));
 
     if (filteredProducts.length === 0) {
         wrapper.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم حالياً ✨' : 'No products available in this section yet ✨'}</p>`;
@@ -236,7 +258,7 @@ function renderCatalog(filter) {
                 <img src="${product.img}" alt="${product.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
             </div>
             <div class="p-info">
-                <span class="p-cat">${product.type || 'ملابس'}</span>
+                <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title}</h3>
                 <div class="p-price-row">
                     <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
@@ -249,7 +271,7 @@ function renderCatalog(filter) {
 }
 
 window.openQuickView = function(productId) {
-    const product = window.productsData.find(p => String(p.id) === String(productId));
+    const product = productsData.find(p => String(p.id) === String(productId));
     if (!product) return;
 
     selectedColor = "";
