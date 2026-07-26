@@ -27,8 +27,8 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
             <button id="lang-toggle-btn" class="icon-btn">
-         <i class="fa-solid fa-globe"></i> <span id="lang-btn-text">English</span>
-             </button>
+                <i class="fa-solid fa-globe"></i> <span id="lang-btn-text">English</span>
+            </button>
             
             <!-- اللوجو بالحجم الأكبر -->
             <div class="logo logo-img-container" id="header-logo-target" onclick="navigateTo('home-page')">
@@ -78,7 +78,6 @@
         <div class="drawer-items" id="cart-items-container"></div>
         
         <div class="drawer-footer">
-            <!-- 🟢 حقول بيانات العميل بنفس تصميم وتنسيق المتجر -->
             <div class="checkout-form-fields" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
                 <input type="text" id="customer-name" placeholder="الاسم الكامل *" style="width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none;">
                 <input type="text" id="customer-address" placeholder="المكان / العنوان بالتفصيل *" style="width: 100%; padding: 12px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none;">
@@ -98,12 +97,12 @@
         <section class="hero">
             <div class="container hero-grid">
                 <div class="hero-text">
-                    <h1>نحن وجهتك الفريده عبر الانترنت لمجموعه واسعه من المنتجات (حريمى - رجالى - أطفال ) خليك إسبرينت <span>Sprint Egypt</span></h1>
-                    <p>تشكيلة استثنائية تجمع النمط الكاجوال المعاصر وخامات فخمة صُممت خصيصاً لتعطيك شعوراً بالثقة والراحة طوال اليوم وبأسعار استثنائية.</p>
+                    <h1 id="dynamic-hero-title">نحن وجهتك الفريده عبر الانترنت لمجموعه واسعه من المنتجات (حريمى - رجالى - أطفال ) خليك إسبرينت Sprint Egypt</h1>
+                    <p id="dynamic-hero-desc">تشكيلة استثنائية تجمع النمط الكاجوال المعاصر وخامات فخمة صُممت خصيصاً لتعطيك شعوراً بالثقة والراحة طوال اليوم وبأسعار استثنائية.</p>
                     <a href="#" class="cta-btn" onclick="navigateTo('shop-page')">اكتشف المتجر الآن <i class="fa-solid fa-arrow-left"></i></a>
                 </div>
                 <div class="hero-image-box">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600" alt="Sprint Collection">
+                    <img id="dynamic-banner-img" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600" alt="Sprint Collection">
                 </div>
             </div>
         </section>
@@ -122,6 +121,10 @@
                     <div class="cat-card" onclick="openCategoryTab('2')">
                         <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=500" alt="التشكيلة النسائية">
                         <div class="cat-overlay"><h3>التشكيلة النسائية</h3></div>
+                    </div>
+                    <div class="cat-card" onclick="openCategoryTab('4')">
+                        <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500" alt="ملابس كاجوال للجنسين">
+                        <div class="cat-overlay"><h3>ملابس كاجوال للجنسين</h3></div>
                     </div>
                     <div class="cat-card" onclick="openCategoryTab('3')">
                         <img src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=500" alt="ملابس الأطفال">
@@ -142,12 +145,12 @@
                 </div>
                 
                 <div class="filter-tabs">
-    <button class="tab active" id="tab-all" onclick="filterShop('all')">الكل</button>
-    <button class="tab" id="tab-2" onclick="filterShop('2')">ملابس حريمى</button>
-    <button class="tab" id="tab-1" onclick="filterShop('1')">ملابس رجالى</button>
-    <button class="tab" id="tab-4" onclick="filterShop('4')">ملابس كاجوال للجنسين</button>
-    <button class="tab" id="tab-3" onclick="filterShop('3')">ملابس أطفال</button>
-</div>
+                    <button class="tab active" id="tab-all" onclick="filterShop('all')">الكل</button>
+                    <button class="tab" id="tab-2" onclick="filterShop('2')">ملابس حريمى</button>
+                    <button class="tab" id="tab-1" onclick="filterShop('1')">ملابس رجالى</button>
+                    <button class="tab" id="tab-4" onclick="filterShop('4')">ملابس كاجوال للجنسين</button>
+                    <button class="tab" id="tab-3" onclick="filterShop('3')">ملابس أطفال</button>
+                </div>
 
                 <div class="products-grid" id="shop-products-wrap"></div>
             </div>
