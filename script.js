@@ -1,5 +1,5 @@
 /* ==========================================================================
-   إعدادات سكريبت متجر Sprint Egypt متصلة بسحابية Firebase (قراءة جميع الإعدادات)
+   إعدادات سكريبت متجر Sprint Egypt - متطابق مع هيكل لوحة التحكم (Admin Dashboard)
    ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -19,6 +19,7 @@ let db = null;
 try {
     const app = initializeApp(firebaseConfig);
     db = getDatabase(app);
+    console.log("🔥 Firebase Connected Successfully!");
 } catch (e) {
     console.error("Firebase Init Error:", e);
 }
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (db) {
         listenToCloudProducts();
-        listenToCloudSettings(); // جلب وقراءة جميع الإعدادات الحية للموقع
+        listenToCloudSettings();
     } else {
         renderCatalog("all");
     }
@@ -84,45 +85,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// استماع وتحديث المنتجات بحسب طريقة حفظ الأدوية/المنتجات في لوحة التحكم
 function listenToCloudProducts() {
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
+        console.log("📦 Products from Firebase:", data);
         if (data) {
-            productsData = Array.isArray(data) ? data.filter(Boolean) : Object.values(data);
+            // معالجة البيانات سواء كانت مصفوفة أو كائن (Object) مدخل من لوحة التحكم
+            if (Array.isArray(data)) {
+                productsData = data.filter(Boolean);
+            } else {
+                productsData = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
+            }
         } else {
             productsData = [];
         }
         renderCatalog(currentActiveFilter);
     }, (error) => {
-        console.error("Cloud fetch error:", error);
+        console.error("Products fetch error:", error);
         renderCatalog(currentActiveFilter);
     });
 }
 
-// دالة شاملة لقراءة وتطبيق كل إعدادات الموقع وتحديث العناصر ديناميكياً
+// استماع شامل لإعدادات لوحة التحكم وتطبيقها على واجهة الموقع
 function listenToCloudSettings() {
     const settingsRef = ref(db, 'settings');
     onValue(settingsRef, (snapshot) => {
         const settings = snapshot.val();
+        console.log("⚙️ Settings from Firebase:", settings);
         if (settings) {
-            // المرور على كل مفتاح في الإعدادات وتحديث العنصر المطابق له في الصفحة لو وُجد ID بنفس الاسم
+            // المرور على كافة الحقول القادمة من لوحة تحكم الأدمن وتطبيقها تلقائياً على عناصر الموقع التي تمتلك نفس الـ ID
             Object.keys(settings).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
-                    const value = settings[key];
-                    // إذا كان العنصر صورة (IMG) نحدث الـ src، وإلا نحدث الـ innerText أو innerHTML
+                    const val = settings[key];
                     if (element.tagName === "IMG") {
-                        element.src = value;
+                        element.src = val;
                     } else if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
-                        element.value = value;
+                        element.value = val;
                     } else {
-                        element.innerText = value;
+                        element.innerText = val;
                     }
                 }
             });
 
-            // تحديثات مخصصة إضافية لو العناصر لها أسماء IDs مختلفة عن مفاتيح القاعدة
+            // مطابقة مخصصة للعناصر الرئيسية في الواجهة تفادياً لاختلاف الأسماء
             if (settings.title && document.getElementById('hero-title')) {
                 document.getElementById('hero-title').innerText = settings.title;
             }
@@ -257,13 +268,13 @@ function renderCatalog(filter) {
         card.innerHTML = `
             ${badgeHtml}
             <div class="p-img-box">
-                <img src="${product.img}" alt="${product.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
+                <img src="${product.img || product.image || ''}" alt="${product.title || ''}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
             </div>
             <div class="p-info">
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
-                <h3 class="p-title">${product.title}</h3>
+                <h3 class="p-title">${product.title || 'منتج بدون اسم'}</h3>
                 <div class="p-price-row">
-                    <span class="p-price">${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
+                    <span class="p-price">${product.price || 0} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
                     ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
                 </div>
             </div>
@@ -279,15 +290,20 @@ window.openQuickView = function(productId) {
     selectedColor = "";
     selectedSize = "";
 
-    document.getElementById("m-title-val").innerText = product.title;
-    document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price} ج.م`;
+    document.getElementById("m-title-val").innerText = product.title || "";
+    document.getElementById("m-price-val").innerText = `${product.price || 0} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price || 0} ج.م`;
     document.getElementById("m-type-val").innerText = product.type || "ملابس قطنية";
     document.getElementById("m-fabric-val").innerText = product.fabric || "خامة عالية الجودة";
-    document.getElementById("m-img-val").src = product.img;
+    document.getElementById("m-img-val").src = product.img || product.image || "";
 
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
-    const productColors = product.colors || ["أسود", "أبيض"]; 
+    let productColors = product.colors;
+    if (typeof productColors === 'string') {
+        productColors = productColors.split(',').map(c => c.trim());
+    }
+    productColors = productColors || ["أسود", "أبيض"];
+
     productColors.forEach(color => {
         const box = document.createElement("button");
         box.className = "option-box";
@@ -302,7 +318,12 @@ window.openQuickView = function(productId) {
 
     const sizesWrap = document.getElementById("m-sizes-options");
     sizesWrap.innerHTML = "";
-    const activeSizes = product.sizes || ["M", "L", "XL"];
+    let activeSizes = product.sizes;
+    if (typeof activeSizes === 'string') {
+        activeSizes = activeSizes.split(',').map(s => s.trim());
+    }
+    activeSizes = activeSizes || ["M", "L", "XL"];
+
     activeSizes.forEach(size => {
         const box = document.createElement("button");
         box.className = "option-box";
@@ -346,7 +367,7 @@ function executeAddToCart(product, color, size) {
             id: product.id,
             title: product.title,
             price: product.price,
-            img: product.img,
+            img: product.img || product.image,
             fabric: product.fabric,
             color: color,
             size: size,
