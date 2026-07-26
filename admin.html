@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم الاحترافية - Sprint Egypt</title>
-    <!-- استدعاء خط Cairo والايقونات -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -39,7 +38,6 @@
             margin: 0 auto;
         }
 
-        /* رأس الصفحة */
         .admin-header {
             display: flex;
             justify-content: space-between;
@@ -81,7 +79,6 @@
             transform: translateY(-2px);
         }
 
-        /* بطاقات الأقسام */
         .admin-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -102,7 +99,6 @@
             padding-bottom: 12px;
         }
 
-        /* شبكة الحقول */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -138,7 +134,6 @@
             cursor: pointer;
         }
 
-        /* أزرار اختيار الألوان والمقاسات التفاعلية */
         .options-section {
             margin-top: 25px;
         }
@@ -188,7 +183,34 @@
             box-shadow: 0 4px 12px rgba(0, 210, 255, 0.3);
         }
 
-        /* زر النشر الرئيسي */
+        /* إضافة لون جديد يدويًا */
+        .add-custom-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .add-custom-box input {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .add-custom-btn {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
         .submit-btn {
             background: linear-gradient(135deg, #00b09b, #96c93d);
             color: white;
@@ -211,7 +233,6 @@
             transform: translateY(-2px);
         }
 
-        /* جدول المنتجات */
         .table-responsive {
             overflow-x: auto;
         }
@@ -258,38 +279,23 @@
             background: var(--danger);
             color: white;
         }
-
-        /* تخصيص شريط التمرير */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--primary-bg);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
     </style>
 </head>
 <body>
 
 <div class="admin-wrapper">
-    <!-- رأس لوحة التحكم -->
     <div class="admin-header">
         <h1><i class="fa-solid fa-shield-halved"></i> لوحة تحكم Sprint Egypt</h1>
-        <a href="index.html" class="back-site-btn"><i class="fa-solid fa-globe"></i> زيارة المتجر</a>
+        <a href="index.html" class="site-link" target="_blank" class="back-site-btn"><i class="fa-solid fa-globe"></i> زيارة المتجر</a>
     </div>
 
-    <!-- بطاقة إضافة منتج -->
     <div class="admin-card">
-        <h3><i class="fa-solid fa-circle-plus"></i> إضافة منتج جديد لسحابية Firebase</h3>
+        <h3><i class="fa-solid fa-circle-plus"></i> إضافة وتعديل منتج في السحابة</h3>
         
         <div class="form-grid" style="margin-top: 20px;">
             <div class="form-group">
                 <label>اسم المنتج</label>
-                <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز راكون">
+                <input type="text" id="new-title" class="admin-input" placeholder="مثال: تيشيرت أوفر سايز">
             </div>
             <div class="form-group">
                 <label>سعر الجملة (ج.م)</label>
@@ -300,24 +306,25 @@
                 <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
             </div>
             <div class="form-group">
-                <label>القسم</label>
+                <label>القسم (بالترتيب الثابت)</label>
                 <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
-                    <option value="1">رجالي</option>
-                    <option value="2" selected>نسائي</option>
-                    <option value="3">أطفالي</option>
+                    <option value="2">ملابس حريمى</option>
+                    <option value="1">ملابس رجالى</option>
+                    <option value="4">ملابس كاجوال للجنسين</option>
+                    <option value="3">ملابس أطفال</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>نوع المنتج</label>
-                <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
+                <label>نوع المنتج (الوصف المختصر)</label>
+                <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت / هودي">
             </div>
             <div class="form-group">
-                <label>نوع القماش</label>
+                <label>نوع القماش / التفاصيل</label>
                 <input type="text" id="new-fabric" class="admin-input" placeholder="قطن عالي الجودة">
             </div>
             <div class="form-group">
                 <label>رابط الصورة</label>
-                <input type="text" id="new-img" class="admin-input" placeholder="https://images.unsplash.com/...">
+                <input type="text" id="new-img" class="admin-input" placeholder="https://...">
             </div>
             <div class="form-group">
                 <label>شارة المنتج (Tag)</label>
@@ -325,22 +332,25 @@
             </div>
         </div>
 
-        <!-- ألوان المنتج -->
+        <!-- الألوان مع إمكانية إضافة لون جديد -->
         <div class="options-section">
             <label><i class="fa-solid fa-palette"></i> اختر الألوان المتاحة للمنتج:</label>
             <div id="admin-colors-container" class="chips-container"></div>
+            <div class="add-custom-box">
+                <input type="text" id="custom-color-input" placeholder="اكتب لوناً جديداً لم يكن موجوداً...">
+                <button type="button" class="add-custom-btn" onclick="addNewColorOption()">+ إضافة اللون</button>
+            </div>
         </div>
 
-        <!-- مقاسات المنتج -->
+        <!-- المقاسات -->
         <div class="options-section">
             <label><i class="fa-solid fa-ruler-combined"></i> اختر المقاسات المتاحة للمنتج:</label>
             <div id="admin-sizes-container" class="chips-container"></div>
         </div>
 
-        <button onclick="addNewProduct()" class="submit-btn"><i class="fa-solid fa-cloud-arrow-up"></i> نشر المنتج على الموقع</button>
+        <button onclick="addNewProduct()" class="submit-btn"><i class="fa-solid fa-cloud-arrow-up"></i> نشر وتحديث المنتج على الموقع</button>
     </div>
 
-    <!-- جدول المنتجات الحالية -->
     <div class="admin-card">
         <h3><i class="fa-solid fa-boxes-stacked"></i> المنتجات الحالية في السحابة</h3>
         <div class="table-responsive">
@@ -363,7 +373,6 @@
     </div>
 </div>
 
-<!-- السكريبت البرمجي للربط مع Firebase -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -382,7 +391,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const allColorsAdmin = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
+    let currentColorsList = ["أسود", "أبيض", "كحلي", "رمادي", "زيتي", "نبيتي", "اوف وايت", "حديدي", "برجندي", "احمر", "بيج", "بيج غامق", "بييسي", "بني", "زيتي جيشي", "اخضر", "لبني", "بيبي بلو", "اصفر", "اصفر بودره", "رمادي فاتح", "رصاصي", "الوان مدمجه"];
     const adultsSizesAdmin = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL", "8XL"];
     const kidsSizesAdmin = ["2", "4", "6", "8", "10", "12", "14", "16", "18", "20"];
 
@@ -392,7 +401,7 @@
         const colorsWrap = document.getElementById("admin-colors-container");
         if(colorsWrap) {
             colorsWrap.innerHTML = "";
-            allColorsAdmin.forEach(color => {
+            currentColorsList.forEach(color => {
                 const chip = document.createElement("div");
                 chip.className = "opt-chip color-opt";
                 chip.innerText = color;
@@ -401,6 +410,16 @@
             });
         }
         updateAdminSizesOption();
+    }
+
+    window.addNewColorOption = function() {
+        const input = document.getElementById("custom-color-input");
+        const val = input.value.trim();
+        if(val && !currentColorsList.includes(val)) {
+            currentColorsList.push(val);
+            input.value = "";
+            renderAdminOptions();
+        }
     }
 
     window.updateAdminSizesOption = function() {
@@ -441,7 +460,12 @@
         }
 
         currentProducts.forEach((product) => {
-            let catName = product.category === "1" ? "رجالي" : (product.category === "2" ? "نسائي" : "أطفالي");
+            let catName = "ملابس حريمى";
+            if (product.category === "1") catName = "ملابس رجالى";
+            else if (product.category === "2") catName = "ملابس حريمى";
+            else if (product.category === "4") catName = "ملابس كاجوال للجنسين";
+            else if (product.category === "3") catName = "ملابس أطفال";
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td><img src="${product.img}" alt="img" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'"></td>
@@ -460,8 +484,8 @@
         const price = Number(document.getElementById("new-price").value);
         const oldPrice = Number(document.getElementById("new-oldprice").value);
         const category = document.getElementById("new-cat").value;
-        const type = document.getElementById("new-type").value.trim() || "تيشيرت";
-        const fabric = document.getElementById("new-fabric").value.trim() || "قطن عالي الجودة";
+        const type = document.getElementById("new-type").value.trim() || "ملابس قطنية";
+        const fabric = document.getElementById("new-fabric").value.trim() || "خامة عالية الجودة";
         const img = document.getElementById("new-img").value.trim();
         const tag = document.getElementById("new-tag").value.trim();
 
@@ -492,7 +516,7 @@
         };
 
         currentProducts.push(newProd);
-        saveToFirebase("تم نشر المنتج بنجاح بالمقاسات والألوان المحددة! 🚀");
+        saveToFirebase("تم نشر وتحديث المنتج بنجاح بالمقاسات والألوان المحددة! 🚀");
     }
 
     window.deleteProduct = function(productId) {
