@@ -242,8 +242,8 @@ window.openQuickView = function(productId) {
 
     document.getElementById("m-title-val").innerText = product.title;
     document.getElementById("m-price-val").innerText = `${product.price} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price} ج.م`;
-    document.getElementById("m-type-val").innerText = product.type || "تيشيرت قطن";
-    document.getElementById("m-fabric-val").innerText = product.fabric || "قطن عالي الجودة";
+    document.getElementById("m-type-val").innerText = product.type || "ملابس قطنية";
+    document.getElementById("m-fabric-val").innerText = product.fabric || "خامة عالية الجودة";
     document.getElementById("m-img-val").src = product.img;
 
     const colorsWrap = document.getElementById("m-colors-options");
