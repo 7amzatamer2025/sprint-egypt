@@ -31,6 +31,11 @@ let selectedColor = "";
 let selectedSize = "";
 let currentActiveFilter = "all";
 
+// متغيّرات إدارة الجملة والقطاعي في نافذة العرض
+let currentPurchaseMode = "retail"; // "retail" or "wholesale"
+let currentQty = 1;
+let currentActiveProduct = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     applyLanguage(currentLang);
@@ -85,14 +90,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// استماع وتحديث المنتجات بحسب طريقة حفظ الأدوية/المنتجات في لوحة التحكم
+// استماع وتحديث المنتجات
 function listenToCloudProducts() {
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
         console.log("📦 Products from Firebase:", data);
         if (data) {
-            // معالجة البيانات سواء كانت مصفوفة أو كائن (Object) مدخل من لوحة التحكم
             if (Array.isArray(data)) {
                 productsData = data.filter(Boolean);
             } else {
@@ -111,14 +115,13 @@ function listenToCloudProducts() {
     });
 }
 
-// استماع شامل لإعدادات لوحة التحكم وتطبيقها على واجهة الموقع
+// استماع شامل لإعدادات لوحة التحكم
 function listenToCloudSettings() {
     const settingsRef = ref(db, 'settings');
     onValue(settingsRef, (snapshot) => {
         const settings = snapshot.val();
         console.log("⚙️ Settings from Firebase:", settings);
         if (settings) {
-            // المرور على كافة الحقول القادمة من لوحة تحكم الأدمن وتطبيقها تلقائياً على عناصر الموقع التي تمتلك نفس الـ ID
             Object.keys(settings).forEach(key => {
                 const element = document.getElementById(key);
                 if (element) {
@@ -133,7 +136,6 @@ function listenToCloudSettings() {
                 }
             });
 
-            // مطابقة مخصصة للعناصر الرئيسية في الواجهة تفادياً لاختلاف الأسماء
             if (settings.title && document.getElementById('hero-title')) {
                 document.getElementById('hero-title').innerText = settings.title;
             }
@@ -265,6 +267,9 @@ function renderCatalog(filter) {
         
         let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
         
+        const retailPrice = product.oldPrice || product.price || 0;
+        const wholesalePrice = product.price || 0;
+
         card.innerHTML = `
             ${badgeHtml}
             <div class="p-img-box">
@@ -274,8 +279,8 @@ function renderCatalog(filter) {
                 <span class="p-cat">${product.type || 'تيشيرت'}</span>
                 <h3 class="p-title">${product.title || 'منتج بدون اسم'}</h3>
                 <div class="p-price-row">
-                    <span class="p-price">${product.price || 0} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'}</span>
-                    ${product.oldPrice ? `<span class="p-old-price" style="text-decoration: none; font-size: 0.9rem; color: var(--text-muted); margin-right: 8px;">${product.oldPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>` : ''}
+                    <span class="p-price">${retailPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>
+                    <span class="p-old-price" style="text-decoration: none; font-size: 0.85rem; color: var(--primary-accent); margin-right: 6px;">${wholesalePrice} ج.م (جملة)</span>
                 </div>
             </div>
         `;
@@ -283,18 +288,22 @@ function renderCatalog(filter) {
     });
 }
 
+// فتح نافذة العرض السريع وتطبيق منطق القطاعي والجملة
 window.openQuickView = function(productId) {
     const product = productsData.find(p => String(p.id) === String(productId));
     if (!product) return;
 
+    currentActiveProduct = product;
     selectedColor = "";
     selectedSize = "";
 
     document.getElementById("m-title-val").innerText = product.title || "";
-    document.getElementById("m-price-val").innerText = `${product.price || 0} ${currentLang === 'ar' ? 'ج.م (جملة)' : 'EGP'} | قطاعي: ${product.oldPrice || product.price || 0} ج.م`;
     document.getElementById("m-type-val").innerText = product.type || "ملابس قطنية";
     document.getElementById("m-fabric-val").innerText = product.fabric || "خامة عالية الجودة";
     document.getElementById("m-img-val").src = product.img || product.image || "";
+
+    // تعيين النمط الافتراضي على القطاعي
+    window.setPurchaseMode('retail');
 
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
@@ -341,7 +350,7 @@ window.openQuickView = function(productId) {
         if (!selectedColor) { alert(currentLang === 'ar' ? "من فضلك اختر اللون أولاً!" : "Please choose a color first!"); return; }
         if (!selectedSize) { alert(currentLang === 'ar' ? "من فضلك اختر المقاس المناسب أولاً!" : "Please choose a suitable size first!"); return; }
         
-        executeAddToCart(product, selectedColor, selectedSize);
+        executeAddToCart(product, selectedColor, selectedSize, currentPurchaseMode, currentQty);
         closeDrawers();
     };
 
@@ -355,23 +364,83 @@ window.openQuickView = function(productId) {
     }, 10);
 };
 
-function executeAddToCart(product, color, size) {
-    const cartItemId = `${product.id}-${color}-${size}`;
+// التعامل مع التبديل بين القطاعي والجملة
+window.setPurchaseMode = function(mode) {
+    currentPurchaseMode = mode;
+    const btnRetail = document.getElementById("mode-retail-btn");
+    const btnWholesale = document.getElementById("mode-wholesale-btn");
+    const minBadge = document.getElementById("min-qty-badge");
+    
+    if(!currentActiveProduct) return;
+
+    const retailPrice = currentActiveProduct.oldPrice || currentActiveProduct.price || 0;
+    const wholesalePrice = currentActiveProduct.price || 0;
+    const minWholesale = Number(currentActiveProduct.minWholesale) || 8;
+
+    if (mode === "wholesale") {
+        btnWholesale.classList.add("active");
+        btnRetail.classList.remove("active");
+        currentQty = minWholesale;
+        document.getElementById("m-price-val").innerText = `${wholesalePrice} ج.م / للقطعة`;
+        if(minBadge) {
+            minBadge.style.display = "inline-block";
+            minBadge.innerText = `الحد الأدنى للجملة: ${minWholesale} قطعة`;
+        }
+    } else {
+        btnRetail.classList.add("active");
+        btnWholesale.classList.remove("active");
+        currentQty = 1;
+        document.getElementById("m-price-val").innerText = `${retailPrice} ج.م / قطاعي`;
+        if(minBadge) {
+            minBadge.style.display = "none";
+        }
+    }
+    
+    const qtyVal = document.getElementById("m-qty-val");
+    if(qtyVal) qtyVal.innerText = currentQty;
+};
+
+// التحكم في عداد الكمية داخل النافذة المنبثقة
+window.updateModalQty = function(change) {
+    if(!currentActiveProduct) return;
+    const minWholesale = Number(currentActiveProduct.minWholesale) || 8;
+
+    if (currentPurchaseMode === "wholesale") {
+        if (change < 0 && currentQty <= minWholesale) {
+            alert(`عفواً، الحد الأدنى لطلب الجملة لهذا المنتج هو ${minWholesale} قطع. لتقليل الكمية عن ذلك قم بالتحويل لنظام القطاعي.`);
+            return;
+        }
+    } else {
+        if (change < 0 && currentQty <= 1) {
+            return;
+        }
+    }
+
+    currentQty += change;
+    document.getElementById("m-qty-val").innerText = currentQty;
+};
+
+function executeAddToCart(product, color, size, mode, quantity) {
+    const unitPrice = (mode === "wholesale") ? Number(product.price || 0) : Number(product.oldPrice || product.price || 0);
+    const modeLabel = (mode === "wholesale") ? "جملة" : "قطاعي";
+    
+    const cartItemId = `${product.id}-${color}-${size}-${mode}`;
     const existingItem = userCart.find(item => item.cartItemId === cartItemId);
 
     if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
     } else {
         userCart.push({
             cartItemId: cartItemId,
             id: product.id,
             title: product.title,
-            price: product.price,
+            price: unitPrice,
+            mode: modeLabel,
             img: product.img || product.image,
             fabric: product.fabric,
             color: color,
             size: size,
-            quantity: 1
+            quantity: quantity
         });
     }
     updateCartUI();
@@ -415,7 +484,7 @@ function updateCartUI() {
             row.innerHTML = `
                 <img class="d-img" src="${item.img}" alt="${item.title}">
                 <div class="d-details">
-                    <h4 class="d-title">${item.title}</h4>
+                    <h4 class="d-title">${item.title} <span style="font-size:0.75rem; color:var(--primary-accent);">(${item.mode})</span></h4>
                     <span class="d-meta-desc">Color: ${item.color} | Size: ${item.size}</span>
                     <div class="d-price">${item.price} EGP</div>
                     <div class="d-qty-ctrl">
@@ -452,7 +521,7 @@ window.triggerCheckout = function() {
     let messageText = `🛍️ *Order from Sprint Egypt*\n👤 Name: ${customerName}\n📍 Address: ${customerAddress}\n📞 Phone: ${customerPhone}\n\n🛒 *Items:*\n`;
 
     userCart.forEach((item, index) => {
-        messageText += `${index + 1}. ${item.title} (${item.color} - ${item.size}) x${item.quantity} - ${item.price} EGP\n`;
+        messageText += `${index + 1}. ${item.title} (${item.mode}) - [${item.color} / ${item.size}] x${item.quantity} - ${item.price * item.quantity} EGP\n`;
     });
 
     const finalTotal = userCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
