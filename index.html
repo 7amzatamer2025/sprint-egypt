@@ -97,7 +97,6 @@
         <section class="hero">
             <div class="container hero-grid">
                 <div class="hero-text">
-                    <!-- ترك العناوين فارغة لمنع الوميض الافتراضي أثناء تحميل الفايربيس -->
                     <h1 id="title"></h1>
                     <p id="desc"></p>
                     
@@ -205,7 +204,7 @@
         </section>
     </div>
 
-    <!-- نافذة العرض السريع المنبثقة -->
+    <!-- نافذة العرض السريع المنبثقة للطلب والجملة -->
     <div class="modal-popup" id="product-modal">
         <div class="modal-grid">
             <div class="m-info-wrap">
@@ -215,7 +214,15 @@
                     <span class="meta-badge" id="m-type-val">نوع القطعة</span>
                     <span class="meta-badge text-accent" id="m-fabric-val">الخامة</span>
                 </div>
+
+                <!-- خيارات بيع الجملة والقطاعي -->
+                <div class="purchase-type-toggle">
+                    <button type="button" class="mode-btn active" id="mode-retail-btn" onclick="setPurchaseMode('retail')">شراء قطاعي</button>
+                    <button type="button" class="mode-btn" id="mode-wholesale-btn" onclick="setPurchaseMode('wholesale')">شراء جملة</button>
+                </div>
+
                 <div class="m-price" id="m-price-val">0 ج.م</div>
+                <div id="min-qty-badge" class="min-qty-badge" style="display:none;"></div>
                 
                 <div class="selector-wrapper">
                     <label class="select-label">اختر اللون المفضل:</label>
@@ -225,6 +232,16 @@
                 <div class="selector-wrapper">
                     <label class="select-label">اختر المقاس المناسب:</label>
                     <div class="options-container" id="m-sizes-options"></div>
+                </div>
+
+                <!-- عداد اختيار الكمية -->
+                <div class="selector-wrapper">
+                    <label class="select-label">الكمية المطلوب طلبها:</label>
+                    <div class="modal-qty-ctrl">
+                        <button class="qty-btn" onclick="updateModalQty(1)">+</button>
+                        <span id="m-qty-val" class="qty-val">1</span>
+                        <button class="qty-btn" onclick="updateModalQty(-1)">-</button>
+                    </div>
                 </div>
 
                 <button class="black-btn" id="m-add-btn" style="margin-top: 20px;">إضافة إلى حقيبة التسوق</button>
