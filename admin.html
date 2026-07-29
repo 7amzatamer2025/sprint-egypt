@@ -93,9 +93,9 @@
         <a href="index.html" target="_blank" class="back-site-btn"><i class="fa-solid fa-globe"></i> زيارة المتجر</a>
     </div>
 
-    <!-- قسم تعديل إعدادات الموقع الأساسية، العناوين، وصور الأقسام (الباقدجات) -->
+    <!-- قسم تعديل إعدادات الموقع الأساسية، العناوين، وصور الأقسام -->
     <div class="admin-card">
-        <h3><i class="fa-solid fa-sliders"></i> تعديل العناوين الرئيسية، البانر، وصور باقدجات الأقسام[cite: 2]</h3>
+        <h3><i class="fa-solid fa-sliders"></i> تعديل العناوين الرئيسية، البانر، وصور باقدجات الأقسام</h3>
         <div class="form-grid" style="margin-top: 20px;">
             <div class="form-group">
                 <label>عنوان الموقع الرئيسي (Hero Title)</label>
@@ -111,22 +111,22 @@
             </div>
         </div>
 
-        <h4 style="margin-top: 20px; font-size: 1rem; color: var(--accent-cyan);"><i class="fa-solid fa-image"></i> صور باقدجات الأقسام في الصفحة الرئيسية[cite: 2]:</h4>
+        <h4 style="margin-top: 20px; font-size: 1rem; color: var(--accent-cyan);"><i class="fa-solid fa-image"></i> صور باقدجات الأقسام في الصفحة الرئيسية:</h4>
         <div class="form-grid" style="margin-top: 15px;">
             <div class="form-group">
-                <label>صورة التشكيلة الرجالية (ID: 1)[cite: 2]</label>
+                <label>صورة التشكيلة الرجالية (ID: 1)</label>
                 <input type="text" id="cat-img-1" class="admin-input" placeholder="رابط صورة الرجالي">
             </div>
             <div class="form-group">
-                <label>صورة التشكيلة النسائية (ID: 2)[cite: 2]</label>
+                <label>صورة التشكيلة النسائية (ID: 2)</label>
                 <input type="text" id="cat-img-2" class="admin-input" placeholder="رابط صورة الحريمي">
             </div>
             <div class="form-group">
-                <label>صورة ملابس كاجوال للجنسين (ID: 4)[cite: 2]</label>
+                <label>صورة ملابس كاجوال للجنسين (ID: 4)</label>
                 <input type="text" id="cat-img-4" class="admin-input" placeholder="رابط صورة الكاجوال">
             </div>
             <div class="form-group">
-                <label>صورة ملابس الأطفال (ID: 3)[cite: 2]</label>
+                <label>صورة ملابس الأطفال (ID: 3)</label>
                 <input type="text" id="cat-img-3" class="admin-input" placeholder="رابط صورة الأطفال">
             </div>
         </div>
@@ -144,20 +144,24 @@
                 <input type="text" id="new-title" class="admin-input" placeholder="تيشيرت أوفر سايز">
             </div>
             <div class="form-group">
-                <label>سعر الجملة (ج.م)</label>
-                <input type="number" id="new-price" class="admin-input" placeholder="250">
-            </div>
-            <div class="form-group">
                 <label>السعر القطاعي (ج.م)</label>
                 <input type="number" id="new-oldprice" class="admin-input" placeholder="300">
             </div>
             <div class="form-group">
-                <label>القسم (ترتيب ثابت)[cite: 2]</label>
+                <label>سعر الجملة للقطعة (ج.م)</label>
+                <input type="number" id="new-price" class="admin-input" placeholder="250">
+            </div>
+            <div class="form-group">
+                <label>أقل كمية لطلب الجملة (مثلاً 8 أو 12)</label>
+                <input type="number" id="new-min-wholesale" class="admin-input" placeholder="8" value="8">
+            </div>
+            <div class="form-group">
+                <label>القسم (ترتيب ثابت)</label>
                 <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
-                    <option value="2">ملابس حريمى[cite: 2]</option>
-                    <option value="1">ملابس رجالى[cite: 2]</option>
-                    <option value="4">ملابس كاجوال للجنسين[cite: 2]</option>
-                    <option value="3">ملابس أطفال[cite: 2]</option>
+                    <option value="2">ملابس حريمى</option>
+                    <option value="1">ملابس رجالى</option>
+                    <option value="4">ملابس كاجوال للجنسين</option>
+                    <option value="3">ملابس أطفال</option>
                 </select>
             </div>
             <div class="form-group">
@@ -209,14 +213,15 @@
                     <tr>
                         <th>الصورة</th>
                         <th>اسم المنتج</th>
-                        <th>الجملة</th>
-                        <th>القطاعي</th>
+                        <th>سعر القطاعي</th>
+                        <th>سعر الجملة</th>
+                        <th>أقل كمية جملة</th>
                         <th>القسم</th>
                         <th>التحكم</th>
                     </tr>
                 </thead>
                 <tbody id="admin-products-list">
-                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
+                    <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">جاري التحميل...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -268,7 +273,6 @@
         if(siteSettings.desc) document.getElementById("site-main-desc").value = siteSettings.desc;
         if(siteSettings.bannerImg) document.getElementById("site-banner-img").value = siteSettings.bannerImg;
         
-        // جلب روابط صور الأقسام في حقول الإدخال
         if(siteSettings.catImg1) document.getElementById("cat-img-1").value = siteSettings.catImg1;
         if(siteSettings.catImg2) document.getElementById("cat-img-2").value = siteSettings.catImg2;
         if(siteSettings.catImg4) document.getElementById("cat-img-4").value = siteSettings.catImg4;
@@ -350,7 +354,7 @@
         tbody.innerHTML = "";
 
         if (currentProducts.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 30px;">لا توجد منتجات مسجلة حالياً ✨</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--text-muted); padding: 30px;">لا توجد منتجات مسجلة حالياً ✨</td></tr>`;
             return;
         }
 
@@ -365,8 +369,9 @@
             tr.innerHTML = `
                 <td><img src="${product.img}" alt="img" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'"></td>
                 <td style="font-weight: 600;">${product.title}</td>
+                <td style="color: var(--text-muted);">${product.oldPrice || product.price || 0} ج.م</td>
                 <td style="color: var(--accent-cyan); font-weight: 700;">${product.price} ج.م</td>
-                <td style="color: var(--text-muted);">${product.oldPrice || '-'} ج.م</td>
+                <td style="font-weight: 700;">${product.minWholesale || 8} قطعة</td>
                 <td>${catName}</td>
                 <td>
                     <div class="action-btns">
@@ -387,6 +392,7 @@
         document.getElementById("new-title").value = product.title || "";
         document.getElementById("new-price").value = product.price || "";
         document.getElementById("new-oldprice").value = product.oldPrice || "";
+        document.getElementById("new-min-wholesale").value = product.minWholesale || 8;
         document.getElementById("new-cat").value = product.category || "2";
         document.getElementById("new-type").value = product.type || "";
         document.getElementById("new-fabric").value = product.fabric || "";
@@ -427,6 +433,7 @@
         document.getElementById("new-title").value = "";
         document.getElementById("new-price").value = "";
         document.getElementById("new-oldprice").value = "";
+        document.getElementById("new-min-wholesale").value = "8";
         document.getElementById("new-img").value = "";
         document.querySelectorAll(".opt-chip").forEach(b => b.classList.remove("selected"));
     }
@@ -436,6 +443,7 @@
         const title = document.getElementById("new-title").value.trim();
         const price = Number(document.getElementById("new-price").value);
         const oldPrice = Number(document.getElementById("new-oldprice").value);
+        const minWholesale = Number(document.getElementById("new-min-wholesale").value) || 8;
         const category = document.getElementById("new-cat").value;
         const type = document.getElementById("new-type").value.trim() || "ملابس قطنية";
         const fabric = document.getElementById("new-fabric").value.trim() || "خامة عالية الجودة";
@@ -458,7 +466,7 @@
                 if(Number(p.id) === Number(editId)) {
                     return {
                         ...p,
-                        category, tag: tag || "جديد", title, price, oldPrice: oldPrice || price, img, type, fabric,
+                        category, tag: tag || "جديد", title, price, oldPrice: oldPrice || price, minWholesale, img, type, fabric,
                         colors: selectedColors.length > 0 ? selectedColors : p.colors,
                         sizes: selectedSizes.length > 0 ? selectedSizes : p.sizes
                     };
@@ -470,7 +478,7 @@
         } else {
             const newProd = {
                 id: Date.now(),
-                category, tag: tag || "جديد", tagClass: "hot", title, price, oldPrice: oldPrice || price, img, type, fabric,
+                category, tag: tag || "جديد", tagClass: "hot", title, price, oldPrice: oldPrice || price, minWholesale, img, type, fabric,
                 colors: selectedColors.length > 0 ? selectedColors : ["أسود", "أبيض"],
                 sizes: selectedSizes.length > 0 ? selectedSizes : ["M", "L", "XL"]
             };
