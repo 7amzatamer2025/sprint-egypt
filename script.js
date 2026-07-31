@@ -1,6 +1,3 @@
-/* ==========================================================================
-   إعدادات سكريبت متجر Sprint Egypt - متطابق مع هيكل لوحة التحكم (Admin Dashboard)
-   ========================================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -31,10 +28,13 @@ let selectedColor = "";
 let selectedSize = "";
 let currentActiveFilter = "all";
 
-// متغيّرات إدارة الجملة والقطاعي في نافذة العرض
-let currentPurchaseMode = "retail"; // "retail" or "wholesale"
+let currentPurchaseMode = "retail";
 let currentQty = 1;
 let currentActiveProduct = null;
+
+// متغيرات سلايدر الصور في المودال
+let modalImages = [];
+let currentImageIndex = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
@@ -74,9 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalCloseBtn = document.getElementById("modal-close-btn");
     if(modalCloseBtn) {
         modalCloseBtn.addEventListener("click", () => {
-            document.getElementById("product-modal").classList.remove("popup-open");
-            if(globalMask) globalMask.classList.remove("show");
-            setTimeout(() => document.getElementById("product-modal").style.display = "none", 400);
+            closeDrawers();
         });
     }
 
@@ -90,20 +88,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// استماع وتحديث المنتجات
 function listenToCloudProducts() {
     const productsRef = ref(db, 'products');
     onValue(productsRef, (snapshot) => {
         const data = snapshot.val();
-        console.log("📦 Products from Firebase:", data);
         if (data) {
             if (Array.isArray(data)) {
                 productsData = data.filter(Boolean);
             } else {
-                productsData = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
+                productsData = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             }
         } else {
             productsData = [];
@@ -115,39 +108,24 @@ function listenToCloudProducts() {
     });
 }
 
-// استماع شامل لإعدادات لوحة التحكم
 function listenToCloudSettings() {
     const settingsRef = ref(db, 'settings');
     onValue(settingsRef, (snapshot) => {
         const settings = snapshot.val();
-        console.log("⚙️ Settings from Firebase:", settings);
         if (settings) {
-            Object.keys(settings).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    const val = settings[key];
-                    if (element.tagName === "IMG") {
-                        element.src = val;
-                    } else if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
-                        element.value = val;
-                    } else {
-                        element.innerText = val;
-                    }
-                }
-            });
+            if (settings.title && document.getElementById('hero-title')) document.getElementById('hero-title').innerText = settings.title;
+            if (settings.desc && document.getElementById('hero-desc')) document.getElementById('hero-desc').innerText = settings.desc;
+            if (settings.bannerImg && document.getElementById('hero-banner')) document.getElementById('hero-banner').src = settings.bannerImg;
+            
+            if (settings.catImg1 && document.getElementById('cat-img-display-1')) document.getElementById('cat-img-display-1').src = settings.catImg1;
+            if (settings.catImg2 && document.getElementById('cat-img-display-2')) document.getElementById('cat-img-display-2').src = settings.catImg2;
+            if (settings.catImg3 && document.getElementById('cat-img-display-3')) document.getElementById('cat-img-display-3').src = settings.catImg3;
+            if (settings.catImg4 && document.getElementById('cat-img-display-4')) document.getElementById('cat-img-display-4').src = settings.catImg4;
 
-            if (settings.title && document.getElementById('hero-title')) {
-                document.getElementById('hero-title').innerText = settings.title;
-            }
-            if (settings.desc && document.getElementById('hero-desc')) {
-                document.getElementById('hero-desc').innerText = settings.desc;
-            }
-            if (settings.bannerImg && document.getElementById('hero-banner')) {
-                document.getElementById('hero-banner').src = settings.bannerImg;
-            }
+            if (settings.facebookLink && document.getElementById('link-facebook')) document.getElementById('link-facebook').href = settings.facebookLink;
+            if (settings.instagramLink && document.getElementById('link-instagram')) document.getElementById('link-instagram').href = settings.instagramLink;
+            if (settings.tiktokLink && document.getElementById('link-tiktok')) document.getElementById('link-tiktok').href = settings.tiktokLink;
         }
-    }, (error) => {
-        console.error("Settings fetch error:", error);
     });
 }
 
@@ -188,8 +166,6 @@ function applyLanguage(lang) {
     const htmlTag = document.documentElement;
     htmlTag.setAttribute("lang", lang);
     htmlTag.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
-    const langBtnText = document.getElementById("lang-btn-text");
-    if (langBtnText) langBtnText.innerText = lang === "ar" ? "English" : "عربي";
 }
 
 function openDrawer(drawerElement) {
@@ -245,6 +221,7 @@ window.filterShop = function(catId) {
     renderCatalog(catId);
 };
 
+// عرض الكتالوج مع التوافق مع الصور المتعددة والأقسام المتعددة
 function renderCatalog(filter) {
     currentActiveFilter = filter;
     const wrapper = document.getElementById("shop-products-wrap");
@@ -253,7 +230,12 @@ function renderCatalog(filter) {
 
     const filteredProducts = filter === "all" 
         ? productsData 
-        : productsData.filter(p => String(p.category) === String(filter));
+        : productsData.filter(p => {
+            if (Array.isArray(p.categories)) {
+                return p.categories.map(String).includes(String(filter));
+            }
+            return String(p.category) === String(filter);
+        });
 
     if (filteredProducts.length === 0) {
         wrapper.innerHTML = `<p style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--text-muted);">${currentLang === 'ar' ? 'لا توجد منتجات متاحة في هذا القسم حالياً ✨' : 'No products available in this section yet ✨'}</p>`;
@@ -263,20 +245,46 @@ function renderCatalog(filter) {
     filteredProducts.forEach(product => {
         const card = document.createElement("div");
         card.className = "product-card";
-        card.onclick = () => openQuickView(product.id);
         
         let badgeHtml = product.tag ? `<span class="p-badge ${product.tagClass || 'hot'}">${product.tag}</span>` : "";
         
         const retailPrice = product.oldPrice || product.price || 0;
         const wholesalePrice = product.price || 0;
 
+        // تجميع جميع الصور المتاحة للمنتج
+        let imagesList = [];
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            imagesList = product.images.filter(Boolean);
+        } else {
+            if(product.img) imagesList.push(product.img);
+            if(product.img2) imagesList.push(product.img2);
+            if(product.img3) imagesList.push(product.img3);
+        }
+        if (imagesList.length === 0) imagesList.push('https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500');
+
+        let carouselSlidesHtml = imagesList.map(imgUrl => `
+            <div class="card-carousel-slide">
+                <img src="${imgUrl}" alt="${product.title || ''}" loading="lazy">
+            </div>
+        `).join('');
+
+        let carouselNavHtml = imagesList.length > 1 ? `
+            <button class="card-carousel-btn prev" onclick="event.stopPropagation(); changeCardSlide(this, -1)">&10094;</button>
+            <button class="card-carousel-btn next" onclick="event.stopPropagation(); changeCardSlide(this, 1)">&10095;</button>
+        ` : '';
+
         card.innerHTML = `
             ${badgeHtml}
-            <div class="p-img-box">
-                <img src="${product.img || product.image || ''}" alt="${product.title || ''}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'">
+            <div class="p-img-box" onclick="openQuickView('${product.id}')">
+                <div class="card-carousel">
+                    <div class="card-carousel-inner" data-index="0" data-total="${imagesList.length}">
+                        ${carouselSlidesHtml}
+                    </div>
+                    ${carouselNavHtml}
+                </div>
             </div>
-            <div class="p-info">
-                <span class="p-cat">${product.type || 'تيشيرت'}</span>
+            <div class="p-info" onclick="openQuickView('${product.id}')">
+                <span class="p-cat">${product.type || 'ملابس'}</span>
                 <h3 class="p-title">${product.title || 'منتج بدون اسم'}</h3>
                 <div class="p-price-row">
                     <span class="p-price">${retailPrice} ${currentLang === 'ar' ? 'ج.م (قطاعي)' : 'EGP'}</span>
@@ -288,7 +296,21 @@ function renderCatalog(filter) {
     });
 }
 
-// فتح نافذة العرض السريع وتطبيق منطق القطاعي والجملة
+// التنقل بين صور المنتج من داخل الكارت في الصفحة الرئيسية
+window.changeCardSlide = function(btnElement, direction) {
+    const carouselInner = btnElement.parentElement.querySelector('.card-carousel-inner');
+    let currentIndex = parseInt(carouselInner.getAttribute('data-index')) || 0;
+    const totalSlides = parseInt(carouselInner.getAttribute('data-total')) || 1;
+
+    currentIndex += direction;
+    if (currentIndex >= totalSlides) currentIndex = 0;
+    if (currentIndex < 0) currentIndex = totalSlides - 1;
+
+    carouselInner.setAttribute('data-index', currentIndex);
+    carouselInner.style.transform = `translateX(${currentIndex * 100}%)`;
+};
+
+// فتح نافذة العرض السريع وتجهيز معرض الصور المتقدم
 window.openQuickView = function(productId) {
     const product = productsData.find(p => String(p.id) === String(productId));
     if (!product) return;
@@ -300,17 +322,28 @@ window.openQuickView = function(productId) {
     document.getElementById("m-title-val").innerText = product.title || "";
     document.getElementById("m-type-val").innerText = product.type || "ملابس قطنية";
     document.getElementById("m-fabric-val").innerText = product.fabric || "خامة عالية الجودة";
-    document.getElementById("m-img-val").src = product.img || product.image || "";
 
-    // تعيين النمط الافتراضي على القطاعي
+    // تجهيز الصور للسلايدر بداخل المودال
+    modalImages = [];
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        modalImages = product.images.filter(Boolean);
+    } else {
+        if(product.img) modalImages.push(product.img);
+        if(product.img2) modalImages.push(product.img2);
+        if(product.img3) modalImages.push(product.img3);
+    }
+    if (modalImages.length === 0) modalImages.push('https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500');
+
+    currentImageIndex = 0;
+    renderModalCarousel();
+
     window.setPurchaseMode('retail');
 
+    // تجهيز خيارات الألوان
     const colorsWrap = document.getElementById("m-colors-options");
     colorsWrap.innerHTML = "";
     let productColors = product.colors;
-    if (typeof productColors === 'string') {
-        productColors = productColors.split(',').map(c => c.trim());
-    }
+    if (typeof productColors === 'string') productColors = productColors.split(',').map(c => c.trim());
     productColors = productColors || ["أسود", "أبيض"];
 
     productColors.forEach(color => {
@@ -325,12 +358,11 @@ window.openQuickView = function(productId) {
         colorsWrap.appendChild(box);
     });
 
+    // تجهيز خيارات المقاسات
     const sizesWrap = document.getElementById("m-sizes-options");
     sizesWrap.innerHTML = "";
     let activeSizes = product.sizes;
-    if (typeof activeSizes === 'string') {
-        activeSizes = activeSizes.split(',').map(s => s.trim());
-    }
+    if (typeof activeSizes === 'string') activeSizes = activeSizes.split(',').map(s => s.trim());
     activeSizes = activeSizes || ["M", "L", "XL"];
 
     activeSizes.forEach(size => {
@@ -364,7 +396,45 @@ window.openQuickView = function(productId) {
     }, 10);
 };
 
-// التعامل مع التبديل بين القطاعي والجملة
+// إنشاء وتحديث معرض الصور داخل نافذة المودال
+function renderModalCarousel() {
+    const track = document.getElementById("modal-carousel-track");
+    const dotsWrap = document.getElementById("modal-carousel-dots");
+    if(!track) return;
+
+    track.innerHTML = modalImages.map(img => `<img src="${img}" alt="Product Image">`).join('');
+    
+    if(dotsWrap) {
+        dotsWrap.innerHTML = modalImages.map((_, idx) => `
+            <span class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselSlide(${idx})"></span>
+        `).join('');
+    }
+    updateCarouselPosition();
+}
+
+window.moveCarousel = function(direction) {
+    currentImageIndex += direction;
+    if (currentImageIndex >= modalImages.length) currentImageIndex = 0;
+    if (currentImageIndex < 0) currentImageIndex = modalImages.length - 1;
+    updateCarouselPosition();
+};
+
+window.goToCarouselSlide = function(index) {
+    currentImageIndex = index;
+    updateCarouselPosition();
+};
+
+function updateCarouselPosition() {
+    const track = document.getElementById("modal-carousel-track");
+    if(track) track.style.transform = `translateX(${currentImageIndex * 100}%)`;
+
+    const dots = document.querySelectorAll("#modal-carousel-dots .carousel-dot");
+    dots.forEach((dot, idx) => {
+        if(idx === currentImageIndex) dot.classList.add("active");
+        else dot.classList.remove("active");
+    });
+}
+
 window.setPurchaseMode = function(mode) {
     currentPurchaseMode = mode;
     const btnRetail = document.getElementById("mode-retail-btn");
@@ -400,20 +470,17 @@ window.setPurchaseMode = function(mode) {
     if(qtyVal) qtyVal.innerText = currentQty;
 };
 
-// التحكم في عداد الكمية داخل النافذة المنبثقة
 window.updateModalQty = function(change) {
     if(!currentActiveProduct) return;
     const minWholesale = Number(currentActiveProduct.minWholesale) || 8;
 
     if (currentPurchaseMode === "wholesale") {
         if (change < 0 && currentQty <= minWholesale) {
-            alert(`عفواً، الحد الأدنى لطلب الجملة لهذا المنتج هو ${minWholesale} قطع. لتقليل الكمية عن ذلك قم بالتحويل لنظام القطاعي.`);
+            alert(`عفواً، الحد الأدنى لطلب الجملة لهذا المنتج هو ${minWholesale} قطع.`);
             return;
         }
     } else {
-        if (change < 0 && currentQty <= 1) {
-            return;
-        }
+        if (change < 0 && currentQty <= 1) return;
     }
 
     currentQty += change;
@@ -427,6 +494,8 @@ function executeAddToCart(product, color, size, mode, quantity) {
     const cartItemId = `${product.id}-${color}-${size}-${mode}`;
     const existingItem = userCart.find(item => item.cartItemId === cartItemId);
 
+    const mainImg = (product.images && product.images[0]) || product.img;
+
     if (existingItem) {
         existingItem.quantity += quantity;
     } else {
@@ -436,8 +505,7 @@ function executeAddToCart(product, color, size, mode, quantity) {
             title: product.title,
             price: unitPrice,
             mode: modeLabel,
-            img: product.img || product.image,
-            fabric: product.fabric,
+            img: mainImg,
             color: color,
             size: size,
             quantity: quantity
@@ -485,7 +553,7 @@ function updateCartUI() {
                 <img class="d-img" src="${item.img}" alt="${item.title}">
                 <div class="d-details">
                     <h4 class="d-title">${item.title} <span style="font-size:0.75rem; color:var(--primary-accent);">(${item.mode})</span></h4>
-                    <span class="d-meta-desc">Color: ${item.color} | Size: ${item.size}</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">لون: ${item.color} | مقاس: ${item.size}</span>
                     <div class="d-price">${item.price} EGP</div>
                     <div class="d-qty-ctrl">
                         <button class="d-qty-btn" onclick="changeQty('${item.cartItemId}', 1)">+</button>
