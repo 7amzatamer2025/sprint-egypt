@@ -47,7 +47,7 @@
             border: 1px solid var(--border-color); color: var(--text-main); border-radius: 10px; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
         .admin-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.15); }
-        select.admin-input { cursor: pointer; }
+        select.admin-input[multiple] { height: 110px; }
 
         .options-section { margin-top: 25px; }
         .options-section label { display: block; font-size: 0.9rem; color: var(--text-main); margin-bottom: 12px; font-weight: 700; }
@@ -93,9 +93,9 @@
         <a href="index.html" target="_blank" class="back-site-btn"><i class="fa-solid fa-globe"></i> زيارة المتجر</a>
     </div>
 
-    <!-- قسم تعديل إعدادات الموقع الأساسية، العناوين، وصور الأقسام -->
+    <!-- قسم تعديل إعدادات الموقع الأساسية، العناوين، وصور الأقسام، وروابط السوشيال -->
     <div class="admin-card">
-        <h3><i class="fa-solid fa-sliders"></i> تعديل العناوين الرئيسية، البانر، وصور باقدجات الأقسام</h3>
+        <h3><i class="fa-solid fa-sliders"></i> تعديل العناوين، البانر، صور الأقسام، وروابط التواصل الاجتماعي</h3>
         <div class="form-grid" style="margin-top: 20px;">
             <div class="form-group">
                 <label>عنوان الموقع الرئيسي (Hero Title)</label>
@@ -108,6 +108,22 @@
             <div class="form-group">
                 <label>رابط الصورة الرئيسية (Banner Image)</label>
                 <input type="text" id="site-banner-img" class="admin-input" placeholder="https://...">
+            </div>
+        </div>
+
+        <h4 style="margin-top: 20px; font-size: 1rem; color: var(--accent-cyan);"><i class="fa-solid fa-share-nodes"></i> روابط شبكات التواصل الاجتماعي (صندوق اتصل بنا):</h4>
+        <div class="form-grid" style="margin-top: 15px;">
+            <div class="form-group">
+                <label>رابط صفحة الفيسبوك</label>
+                <input type="text" id="site-facebook-link" class="admin-input" placeholder="https://facebook.com/yourpage">
+            </div>
+            <div class="form-group">
+                <label>رابط حساب الانستجرام</label>
+                <input type="text" id="site-instagram-link" class="admin-input" placeholder="https://instagram.com/yourprofile">
+            </div>
+            <div class="form-group">
+                <label>رابط حساب التيك توك</label>
+                <input type="text" id="site-tiktok-link" class="admin-input" placeholder="https://tiktok.com/@yourprofile">
             </div>
         </div>
 
@@ -130,10 +146,10 @@
                 <input type="text" id="cat-img-3" class="admin-input" placeholder="رابط صورة الأطفال">
             </div>
         </div>
-        <button onclick="saveSiteSettings()" class="submit-btn" style="margin-top: 20px;"><i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الموقع والصور</button>
+        <button onclick="saveSiteSettings()" class="submit-btn" style="margin-top: 20px;"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات وروابط التواصل</button>
     </div>
 
-    <!-- قسم إضافة وتعديل المنتجات -->
+    <!-- قسم إضافة وتعديل المنتجات المحدث (أقسام متعددة + صور متعددة) -->
     <div class="admin-card">
         <h3 id="form-section-title"><i class="fa-solid fa-circle-plus"></i> إضافة منتج جديد</h3>
         <input type="hidden" id="editing-product-id" value="">
@@ -152,18 +168,21 @@
                 <input type="number" id="new-price" class="admin-input" placeholder="250">
             </div>
             <div class="form-group">
-                <label>أقل كمية لطلب الجملة (مثلاً 8 أو 12)</label>
+                <label>أقل كمية لطلب الجملة</label>
                 <input type="number" id="new-min-wholesale" class="admin-input" placeholder="8" value="8">
             </div>
+            
+            <!-- اختيار كذا قسم (Multiple Categories) -->
             <div class="form-group">
-                <label>القسم (ترتيب ثابت)</label>
-                <select id="new-cat" class="admin-input" onchange="updateAdminSizesOption()">
-                    <option value="2">ملابس حريمى</option>
+                <label>الأقسام (يمكنك تحديد أكثر من قسم باضغط على Ctrl أو Cmd):</label>
+                <select id="new-cat" class="admin-input" multiple onchange="updateAdminSizesOption()">
+                    <option value="2" selected>ملابس حريمى</option>
                     <option value="1">ملابس رجالى</option>
                     <option value="4">ملابس كاجوال للجنسين</option>
                     <option value="3">ملابس أطفال</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label>نوع المنتج</label>
                 <input type="text" id="new-type" class="admin-input" placeholder="تيشيرت">
@@ -173,18 +192,31 @@
                 <input type="text" id="new-fabric" class="admin-input" placeholder="قطن 100%">
             </div>
             <div class="form-group">
-                <label>رابط الصورة</label>
-                <input type="text" id="new-img" class="admin-input" placeholder="https://...">
-            </div>
-            <div class="form-group">
                 <label>شارة المنتج (Tag)</label>
                 <input type="text" id="new-tag" class="admin-input" placeholder="جديد / خصم">
             </div>
         </div>
 
-        <!-- الألوان مع إمكانية الحذف والإضافة -->
+        <!-- إضافة روابط صور متعددة للمنتج -->
+        <h4 style="margin-top: 20px; font-size: 0.95rem; color: var(--accent-cyan);"><i class="fa-solid fa-images"></i> صور المنتج (يمكنك وضع حتى 3 صور):</h4>
+        <div class="form-grid" style="margin-top: 10px;">
+            <div class="form-group">
+                <label>رابط الصورة الرئيسية (1) *مطلوب*</label>
+                <input type="text" id="new-img-1" class="admin-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>رابط الصورة الثانية (2) *اختياري*</label>
+                <input type="text" id="new-img-2" class="admin-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>رابط الصورة الثالثة (3) *اختياري*</label>
+                <input type="text" id="new-img-3" class="admin-input" placeholder="https://...">
+            </div>
+        </div>
+
+        <!-- الألوان -->
         <div class="options-section">
-            <label><i class="fa-solid fa-palette"></i> الألوان المتاحة (اضغط لاختيارها، أو اضغط ✕ لحذف لون لا تحتاجه):</label>
+            <label><i class="fa-solid fa-palette"></i> الألوان المتاحة (اضغط لاختيارها، أو اضغط ✕ لحذف لون):</label>
             <div id="admin-colors-container" class="chips-container"></div>
             <div class="add-custom-box">
                 <input type="text" id="custom-color-input" placeholder="إضافة لون جديد للقائمة...">
@@ -216,7 +248,7 @@
                         <th>سعر القطاعي</th>
                         <th>سعر الجملة</th>
                         <th>أقل كمية جملة</th>
-                        <th>القسم</th>
+                        <th>الأقسام</th>
                         <th>التحكم</th>
                     </tr>
                 </thead>
@@ -253,7 +285,6 @@
     let currentProducts = [];
     let siteSettings = {};
 
-    // جلب البيانات والإعدادات من Firebase
     const rootRef = ref(db);
     onValue(rootRef, (snapshot) => {
         const data = snapshot.val() || {};
@@ -273,6 +304,10 @@
         if(siteSettings.desc) document.getElementById("site-main-desc").value = siteSettings.desc;
         if(siteSettings.bannerImg) document.getElementById("site-banner-img").value = siteSettings.bannerImg;
         
+        if(siteSettings.facebookLink) document.getElementById("site-facebook-link").value = siteSettings.facebookLink;
+        if(siteSettings.instagramLink) document.getElementById("site-instagram-link").value = siteSettings.instagramLink;
+        if(siteSettings.tiktokLink) document.getElementById("site-tiktok-link").value = siteSettings.tiktokLink;
+
         if(siteSettings.catImg1) document.getElementById("cat-img-1").value = siteSettings.catImg1;
         if(siteSettings.catImg2) document.getElementById("cat-img-2").value = siteSettings.catImg2;
         if(siteSettings.catImg4) document.getElementById("cat-img-4").value = siteSettings.catImg4;
@@ -284,14 +319,18 @@
         const desc = document.getElementById("site-main-desc").value.trim();
         const bannerImg = document.getElementById("site-banner-img").value.trim();
         
+        const facebookLink = document.getElementById("site-facebook-link").value.trim();
+        const instagramLink = document.getElementById("site-instagram-link").value.trim();
+        const tiktokLink = document.getElementById("site-tiktok-link").value.trim();
+
         const catImg1 = document.getElementById("cat-img-1").value.trim();
         const catImg2 = document.getElementById("cat-img-2").value.trim();
         const catImg4 = document.getElementById("cat-img-4").value.trim();
         const catImg3 = document.getElementById("cat-img-3").value.trim();
 
-        siteSettings = { title, desc, bannerImg, catImg1, catImg2, catImg4, catImg3 };
+        siteSettings = { title, desc, bannerImg, facebookLink, instagramLink, tiktokLink, catImg1, catImg2, catImg4, catImg3 };
         set(ref(db, 'settings'), siteSettings).then(() => {
-            alert("تم حفظ إعدادات الموقع وصور الأقسام الرئيسية بنجاح! ✨");
+            alert("تم حفظ إعدادات الموقع وروابط التواصل الاجتماعي بنجاح! ✨");
         });
     }
 
@@ -302,7 +341,7 @@
         currentColorsList.forEach((color, index) => {
             const chip = document.createElement("div");
             chip.className = "opt-chip color-opt";
-            chip.innerHTML = `<span>${color}</span> <span class="delete-color-x" title="حذف هذا اللون نهائياً" onclick="event.stopPropagation(); removeColorOption(${index})">✕</span>`;
+            chip.innerHTML = `<span>${color}</span> <span class="delete-color-x" title="حذف" onclick="event.stopPropagation(); removeColorOption(${index})">✕</span>`;
             chip.onclick = () => chip.classList.toggle("selected");
             colorsWrap.appendChild(chip);
         });
@@ -320,7 +359,7 @@
     }
 
     window.removeColorOption = function(index) {
-        if(confirm("هل أنت متأكد من حذف هذا اللون من قائمة الألوان المتاحة؟")) {
+        if(confirm("هل أنت متأكد من حذف هذا اللون؟")) {
             currentColorsList.splice(index, 1);
             saveColorsToFirebase();
         }
@@ -333,12 +372,13 @@
     }
 
     window.updateAdminSizesOption = function() {
-        const cat = document.getElementById("new-cat").value;
+        const select = document.getElementById("new-cat");
+        const selectedCats = Array.from(select.selectedOptions).map(opt => opt.value);
         const sizesWrap = document.getElementById("admin-sizes-container");
         if(!sizesWrap) return;
         sizesWrap.innerHTML = "";
         
-        const targetSizes = (cat === "3") ? kidsSizesAdmin : adultsSizesAdmin;
+        const targetSizes = selectedCats.includes("3") ? kidsSizesAdmin : adultsSizesAdmin;
         targetSizes.forEach(size => {
             const chip = document.createElement("div");
             chip.className = "opt-chip size-opt";
@@ -359,20 +399,25 @@
         }
 
         currentProducts.forEach((product) => {
-            let catName = "ملابس حريمى";
-            if (product.category === "1") catName = "ملابس رجالى";
-            else if (product.category === "2") catName = "ملابس حريمى";
-            else if (product.category === "4") catName = "ملابس كاجوال للجنسين";
-            else if (product.category === "3") catName = "ملابس أطفال";
+            let catNames = [];
+            let cats = product.categories || (product.category ? [product.category] : []);
+            cats.forEach(c => {
+                if (c === "1") catNames.push("رجالى");
+                else if (c === "2") catNames.push("حريمى");
+                else if (c === "4") catNames.push("كاجوال");
+                else if (c === "3") catNames.push("أطفال");
+            });
+
+            const mainImg = (product.images && product.images[0]) || product.img || '';
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><img src="${product.img}" alt="img" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'"></td>
+                <td><img src="${mainImg}" alt="img" onerror="this.src='https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=500'"></td>
                 <td style="font-weight: 600;">${product.title}</td>
                 <td style="color: var(--text-muted);">${product.oldPrice || product.price || 0} ج.م</td>
                 <td style="color: var(--accent-cyan); font-weight: 700;">${product.price} ج.م</td>
                 <td style="font-weight: 700;">${product.minWholesale || 8} قطعة</td>
-                <td>${catName}</td>
+                <td>${catNames.join('، ') || 'غير محدد'}</td>
                 <td>
                     <div class="action-btns">
                         <button class="action-edit-btn" onclick="window.startEditProduct(${product.id})"><i class="fa-solid fa-pen"></i> تعديل</button>
@@ -393,11 +438,23 @@
         document.getElementById("new-price").value = product.price || "";
         document.getElementById("new-oldprice").value = product.oldPrice || "";
         document.getElementById("new-min-wholesale").value = product.minWholesale || 8;
-        document.getElementById("new-cat").value = product.category || "2";
+        
+        // ضبط تحديد الأقسام المتعددة
+        const select = document.getElementById("new-cat");
+        let activeCats = product.categories || (product.category ? [String(product.category)] : ["2"]);
+        Array.from(select.options).forEach(opt => {
+            opt.selected = activeCats.map(String).includes(String(opt.value));
+        });
+
         document.getElementById("new-type").value = product.type || "";
         document.getElementById("new-fabric").value = product.fabric || "";
-        document.getElementById("new-img").value = product.img || "";
         document.getElementById("new-tag").value = product.tag || "";
+
+        // ضبط صور المنتج الثلاث
+        let imgs = product.images || [product.img, product.img2, product.img3].filter(Boolean);
+        document.getElementById("new-img-1").value = imgs[0] || product.img || "";
+        document.getElementById("new-img-2").value = imgs[1] || product.img2 || "";
+        document.getElementById("new-img-3").value = imgs[2] || product.img3 || "";
 
         updateAdminSizesOption();
 
@@ -434,7 +491,9 @@
         document.getElementById("new-price").value = "";
         document.getElementById("new-oldprice").value = "";
         document.getElementById("new-min-wholesale").value = "8";
-        document.getElementById("new-img").value = "";
+        document.getElementById("new-img-1").value = "";
+        document.getElementById("new-img-2").value = "";
+        document.getElementById("new-img-3").value = "";
         document.querySelectorAll(".opt-chip").forEach(b => b.classList.remove("selected"));
     }
 
@@ -444,11 +503,20 @@
         const price = Number(document.getElementById("new-price").value);
         const oldPrice = Number(document.getElementById("new-oldprice").value);
         const minWholesale = Number(document.getElementById("new-min-wholesale").value) || 8;
-        const category = document.getElementById("new-cat").value;
+        
+        // جلب الأقسام المحددة
+        const catSelect = document.getElementById("new-cat");
+        const selectedCategories = Array.from(catSelect.selectedOptions).map(opt => opt.value);
+
         const type = document.getElementById("new-type").value.trim() || "ملابس قطنية";
         const fabric = document.getElementById("new-fabric").value.trim() || "خامة عالية الجودة";
-        const img = document.getElementById("new-img").value.trim();
         const tag = document.getElementById("new-tag").value.trim();
+
+        // جلب روابط الصور الثلاث
+        const img1 = document.getElementById("new-img-1").value.trim();
+        const img2 = document.getElementById("new-img-2").value.trim();
+        const img3 = document.getElementById("new-img-3").value.trim();
+        const images = [img1, img2, img3].filter(Boolean);
 
         const selectedColors = [];
         document.querySelectorAll(".color-opt.selected").forEach(b => selectedColors.push(b.innerText.replace("✕", "").trim()));
@@ -456,8 +524,13 @@
         const selectedSizes = [];
         document.querySelectorAll(".size-opt.selected").forEach(b => selectedSizes.push(b.innerText));
 
-        if(!title || !price || !img) {
-            alert("من فضلك أدخل البيانات الأساسية (اسم المنتج، السعر، ورابط الصورة)!");
+        if(!title || !price || images.length === 0) {
+            alert("من فضلك أدخل البيانات الأساسية (اسم المنتج، السعر، ورابط الصورة الأولى على الأقل)!");
+            return;
+        }
+
+        if(selectedCategories.length === 0) {
+            alert("من فضلك اختر قسم واحد على الأقل للمنتج!");
             return;
         }
 
@@ -466,7 +539,17 @@
                 if(Number(p.id) === Number(editId)) {
                     return {
                         ...p,
-                        category, tag: tag || "جديد", title, price, oldPrice: oldPrice || price, minWholesale, img, type, fabric,
+                        category: selectedCategories[0],
+                        categories: selectedCategories,
+                        tag: tag || "جديد",
+                        title, price,
+                        oldPrice: oldPrice || price,
+                        minWholesale,
+                        img: images[0],
+                        img2: images[1] || "",
+                        img3: images[2] || "",
+                        images: images,
+                        type, fabric,
                         colors: selectedColors.length > 0 ? selectedColors : p.colors,
                         sizes: selectedSizes.length > 0 ? selectedSizes : p.sizes
                     };
@@ -478,7 +561,18 @@
         } else {
             const newProd = {
                 id: Date.now(),
-                category, tag: tag || "جديد", tagClass: "hot", title, price, oldPrice: oldPrice || price, minWholesale, img, type, fabric,
+                category: selectedCategories[0],
+                categories: selectedCategories,
+                tag: tag || "جديد",
+                tagClass: "hot",
+                title, price,
+                oldPrice: oldPrice || price,
+                minWholesale,
+                img: images[0],
+                img2: images[1] || "",
+                img3: images[2] || "",
+                images: images,
+                type, fabric,
                 colors: selectedColors.length > 0 ? selectedColors : ["أسود", "أبيض"],
                 sizes: selectedSizes.length > 0 ? selectedSizes : ["M", "L", "XL"]
             };
