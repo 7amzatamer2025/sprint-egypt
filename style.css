@@ -491,3 +491,47 @@ footer h4 { color: #fff; margin-bottom: 10px; font-size: 1.1rem; font-weight: 80
     color: var(--primary-accent, #00d2ff);
     font-weight: 700;
 }
+/* ==========================================================================
+   تنسيقات أزرار السوشيال ميديا (Facebook, Instagram, TikTok)
+   ========================================================================== */
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--bg-card, #131b2e);
+    border: 1px solid var(--border, #1e293b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main, #ffffff);
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* لون الفيسبوك */
+.social-btn.facebook:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+    transform: translateY(-3px);
+}
+
+/* لون انستجرام */
+.social-btn.instagram:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+    transform: translateY(-3px);
+}
+
+/* لون التيك توك */
+.social-btn.tiktok:hover {
+    background: #000000;
+    color: #00f2fe;
+    border-color: #fe2c55;
+    box-shadow: 0 4px 15px rgba(254, 44, 85, 0.4);
+    transform: translateY(-3px);
+}
