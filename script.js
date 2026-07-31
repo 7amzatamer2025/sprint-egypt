@@ -269,8 +269,8 @@ function renderCatalog(filter) {
         `).join('');
 
         let carouselNavHtml = imagesList.length > 1 ? `
-            <button class="card-carousel-btn prev" onclick="event.stopPropagation(); changeCardSlide(this, -1)">&10094;</button>
-            <button class="card-carousel-btn next" onclick="event.stopPropagation(); changeCardSlide(this, 1)">&10095;</button>
+            <button class="card-carousel-btn prev" onclick="event.stopPropagation(); changeCardSlide(this, -1)">&#10094;</button>
+            <button class="card-carousel-btn next" onclick="event.stopPropagation(); changeCardSlide(this, 1)">&#10095;</button>
         ` : '';
 
         card.innerHTML = `
