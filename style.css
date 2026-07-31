@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. المتغيرات والأنماط الأساسية (Variables & Root Rules)
+   ========================================================================== */
 :root {
     --bg-dark-brand: #001f3f;
     --primary-accent: #00a8e8;
@@ -58,6 +61,15 @@ img {
     transition: opacity 0.3s ease-in-out;
 }
 
+.container {
+    width: 90%;
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+/* ==========================================================================
+   2. شاشة الترحيب والتحميل (Splash Screen)
+   ========================================================================== */
 .splash-content {
     display: flex;
     flex-direction: column;
@@ -98,6 +110,11 @@ img {
     box-shadow: 0 0 15px var(--primary-accent);
 }
 
+.splash-hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
 @keyframes pulseLogo {
     0% { transform: scale(0.95); filter: drop-shadow(0 0 15px rgba(0, 168, 232, 0.3)); }
     100% { transform: scale(1.08); filter: drop-shadow(0 0 30px rgba(0, 168, 232, 0.9)); }
@@ -114,17 +131,9 @@ img {
     100% { width: 10px; opacity: 0.3; }
 }
 
-.splash-hide {
-    opacity: 0;
-    visibility: hidden;
-}
-
-.container {
-    width: 90%;
-    max-width: 1240px;
-    margin: 0 auto;
-}
-
+/* ==========================================================================
+   3. شريط الإعلانات والترويج (Promo Bar)
+   ========================================================================== */
 .promo-bar {
     background: linear-gradient(90deg, #020f1f, var(--bg-dark-brand), #020f1f);
     color: #ffffff;
@@ -136,6 +145,9 @@ img {
     letter-spacing: 0.5px;
 }
 
+/* ==========================================================================
+   4. الهيدر وشريط التنقل (Header & Navbar)
+   ========================================================================== */
 header {
     position: sticky;
     top: 0;
@@ -204,10 +216,15 @@ header {
 .badge { position: absolute; top: 2px; left: 2px; background-color: var(--primary-accent); color: #ffffff; font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 10px rgba(0,168,232,0.4); }
 .menu-toggle { display: none; }
 
+/* ==========================================================================
+   5. إدارة الصفحات التنقلية (Page Switching)
+   ========================================================================== */
 .page { display: none; opacity: 0; transform: translateY(15px); transition: var(--transition-smooth); }
 .page.active-page { display: block; opacity: 1; transform: translateY(0); }
 
-/* --- Hero Section --- */
+/* ==========================================================================
+   6. قسم الهيرو الرئيسي (Hero Section)
+   ========================================================================== */
 .hero { padding: 70px 0; background: radial-gradient(circle at bottom left, var(--bg-light) 0%, var(--bg-page) 75%); position: relative; overflow: hidden; }
 .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
 .hero-text h1 { font-size: 3rem; font-weight: 900; line-height: 1.2; margin-bottom: 18px; letter-spacing: -0.5px; min-height: 1.2em; }
@@ -219,13 +236,14 @@ header {
 .hero-image-box img { width: 100%; max-width: 440px; border-radius: var(--radius); box-shadow: var(--shadow-premium); border: 2px solid var(--border); transition: var(--transition-smooth); }
 .hero-image-box img:hover { transform: scale(1.02); }
 
-/* --- الفئات (تم تعديل التنسيق ليكون 4 مربعات بجانب بعضها وحجم أصغر) --- */
+/* ==========================================================================
+   7. قسم الفئات والشبكة (Categories Section)
+   ========================================================================== */
 .categories-sec { padding: 70px 0; background-color: var(--bg-light); }
 .section-header { text-align: center; margin-bottom: 40px; }
 .section-header h2 { font-size: 2.1rem; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; }
 .section-subtitle { color: var(--text-muted); font-size: 0.95rem; }
 
-/* 🛠️ الكود التعديلي لـ 4 مربعات */
 .cat-grid { 
     display: grid; 
     grid-template-columns: repeat(4, 1fr); 
@@ -246,7 +264,9 @@ header {
 .cat-card:hover img { transform: scale(1.08); filter: brightness(1); }
 .cat-card:hover .cat-overlay h3 { transform: translateY(0); color: var(--primary-accent); }
 
-/* --- المتجر والمنتجات --- */
+/* ==========================================================================
+   8. قسم المتجر وبطاقات المنتجات (Shop & Products)
+   ========================================================================== */
 .shop-layout { padding: 60px 0 90px 0; }
 .filter-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
 .tab { padding: 10px 22px; border: 1px solid var(--border); background-color: var(--bg-card); color: var(--text-main); border-radius: 30px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition-smooth); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
@@ -267,7 +287,9 @@ header {
 .p-price { font-weight: 900; color: var(--primary-accent); font-size: 1.15rem; }
 .p-old-price { color: var(--text-muted); text-decoration: line-through; font-size: 0.85rem; }
 
-/* --- من نحن واتصل بنا --- */
+/* ==========================================================================
+   9. أقسام من نحن والتواصل (About & Contact Sections)
+   ========================================================================== */
 .about-sec, .contact-sec { padding: 70px 0; }
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
 .about-text h3 { font-size: 1.8rem; font-weight: 900; margin-bottom: 16px; }
@@ -283,7 +305,9 @@ header {
 .form-group input, .form-group textarea { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background-color: var(--bg-light); color: var(--text-main); outline: none; font-size: 0.9rem; transition: var(--transition-smooth); }
 .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-accent); background-color: var(--bg-card); box-shadow: 0 0 0 4px rgba(0,168,232,0.15); }
 
-/* --- الـ Drawers والأ modal --- */
+/* ==========================================================================
+   10. القوائم الجانبية وسلة التسوق (Drawers & Cart)
+   ========================================================================== */
 .overlay-mask { position: fixed; inset: 0; background: rgba(3, 10, 18, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 998; display: none; opacity: 0; transition: opacity 0.4s ease; }
 .overlay-mask.show { display: block; opacity: 1; }
 
@@ -320,7 +344,9 @@ header {
 .black-btn { width: 100%; background: linear-gradient(135deg, var(--bg-dark-brand), #003366); color: #ffffff; border: none; padding: 14px; font-weight: 800; border-radius: var(--radius); cursor: pointer; transition: var(--transition-smooth); display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 0.95rem; box-shadow: 0 10px 25px rgba(0, 31, 63, 0.3); border: 1px solid rgba(255,255,255,0.1); }
 .black-btn:hover { background: var(--primary-accent); transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 168, 232, 0.4); }
 
-/* --- النافذة المنبثقة للعرض السريع (Modal) --- */
+/* ==========================================================================
+   11. النافذة المنبثقة للعرض السريع (Product Modal Popup)
+   ========================================================================== */
 .modal-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: 90%; max-width: 800px; background: var(--bg-card); color: var(--text-main); border-radius: var(--radius); z-index: 1001; display: none; box-shadow: 0 25px 60px rgba(0,0,0,0.4); overflow: hidden; opacity: 0; transition: var(--transition-smooth); border: 1px solid var(--border); }
 .modal-popup.popup-open { display: block; transform: translate(-50%, -50%) scale(1); opacity: 1; }
 .modal-grid { display: grid; grid-template-columns: 1fr 1fr; direction: ltr; }
@@ -338,13 +364,187 @@ header {
 .selector-wrapper { margin-bottom: 14px; }
 .select-label { font-size: 0.85rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 6px; }
 .options-container { display: flex; flex-wrap: wrap; gap: 8px; }
-.option-box { padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; background: var(--bg-card); color: var(--text-main); transition: var(--transition-smooth); }
-.option-box:hover { border-color: var(--primary-accent); background: var(--bg-light); }
-.option-box.selected { background: var(--primary-accent); color: #ffffff; border-color: var(--primary-accent); box-shadow: 0 6px 15px rgba(0, 168, 232, 0.35); transform: translateY(-2px); }
 
-footer { background: var(--bg-dark-brand); color: #8892b0; padding: 50px 0 20px 0; font-size: 0.88rem; border-top: 4px solid var(--primary-accent); text-align: center; }
-footer h4 { color: #fff; margin-bottom: 10px; font-size: 1.1rem; font-weight: 800; }
+/* ==========================================================================
+   12. نظام شراء الجملة والقطاعي والعداد (Wholesale/Retail & Modal UI Fixes)
+   ========================================================================== */
 
+/* أزرار التحويل بين القطاعي والجملة */
+.purchase-type-toggle {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mode-btn:hover {
+    border-color: var(--primary-accent);
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, var(--primary-accent-hover), var(--primary-accent));
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(0, 168, 232, 0.25);
+}
+
+/* شارة الحد الأدنى للجملة */
+.min-qty-badge {
+    display: inline-block;
+    background: rgba(243, 156, 18, 0.15);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* وحدة التحكم بالكمية (+ / -) داخل المودال */
+.modal-qty-ctrl {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.modal-qty-ctrl .qty-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: none;
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-qty-ctrl .qty-btn:hover {
+    background: var(--primary-accent);
+    color: #ffffff;
+}
+
+.modal-qty-ctrl .qty-val {
+    padding: 0 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+/* خيارات الألوان والمقاسات عند التحديد */
+.option-box {
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.option-box:hover {
+    border-color: var(--primary-accent);
+    background: var(--bg-light);
+}
+
+.option-box.selected {
+    border-color: var(--primary-accent);
+    background: rgba(0, 168, 232, 0.1);
+    color: var(--primary-accent);
+    font-weight: 700;
+    box-shadow: 0 6px 15px rgba(0, 168, 232, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   13. أزرار وسائل التواصل الاجتماعي (Social Media Buttons)
+   ========================================================================== */
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* لون الفيسبوك */
+.social-btn.facebook:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+    transform: translateY(-3px);
+}
+
+/* لون انستجرام */
+.social-btn.instagram:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+    transform: translateY(-3px);
+}
+
+/* لون التيك توك */
+.social-btn.tiktok:hover {
+    background: #000000;
+    color: #00f2fe;
+    border-color: #fe2c55;
+    box-shadow: 0 4px 15px rgba(254, 44, 85, 0.4);
+    transform: translateY(-3px);
+}
+
+/* ==========================================================================
+   14. الفوتر (Footer)
+   ========================================================================== */
+footer { 
+    background: var(--bg-dark-brand); 
+    color: #8892b0; 
+    padding: 50px 0 20px 0; 
+    font-size: 0.88rem; 
+    border-top: 4px solid var(--primary-accent); 
+    text-align: center; 
+}
+
+footer h4 { 
+    color: #fff; 
+    margin-bottom: 10px; 
+    font-size: 1.1rem; 
+    font-weight: 800; 
+}
+
+/* ==========================================================================
+   15. التجاوب مع الشاشات المختلفة (Media Queries)
+   ========================================================================== */
 @media (max-width: 992px) {
     .cat-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -385,153 +585,4 @@ footer h4 { color: #fff; margin-bottom: 10px; font-size: 1.1rem; font-weight: 80
     .modal-grid { grid-template-columns: 1fr; }
     .m-img-wrap { height: 220px; }
     .m-info-wrap { padding: 20px; }
-}
-/* ==========================================================================
-   تنسيقات نظام شراء الجملة والقطاعي والعداد (Modal UI Fixes)
-   ========================================================================== */
-
-/* 1. أزرار التحويل بين القطاعي والجملة */
-.purchase-type-toggle {
-    display: flex;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.mode-btn {
-    flex: 1;
-    padding: 10px 16px;
-    background: var(--bg-card, #131b2e);
-    border: 1px solid var(--border, #1e293b);
-    color: var(--text-main, #ffffff);
-    border-radius: 8px;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.mode-btn:hover {
-    border-color: var(--primary-accent, #00d2ff);
-}
-
-.mode-btn.active {
-    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(0, 210, 255, 0.25);
-}
-
-/* 2. شارة الحد الأدنى للجملة */
-.min-qty-badge {
-    display: inline-block;
-    background: rgba(243, 156, 18, 0.15);
-    color: #f39c12;
-    border: 1px solid rgba(243, 156, 18, 0.3);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-/* 3. وحدة التحكم بالكمية (+ / -) */
-.modal-qty-ctrl {
-    display: inline-flex;
-    align-items: center;
-    background: var(--bg-card, #131b2e);
-    border: 1px solid var(--border, #1e293b);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.modal-qty-ctrl .qty-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-main, #ffffff);
-    border: none;
-    width: 38px;
-    height: 38px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-qty-ctrl .qty-btn:hover {
-    background: var(--primary-accent, #00d2ff);
-    color: #ffffff;
-}
-
-.modal-qty-ctrl .qty-val {
-    padding: 0 16px;
-    font-weight: 700;
-    color: var(--text-main, #ffffff);
-    font-size: 1rem;
-}
-
-/* 4. تحسين خيارات الألوان والمقاسات عند التحديد */
-.option-box {
-    padding: 8px 16px;
-    background: var(--bg-card, #131b2e);
-    border: 1px solid var(--border, #1e293b);
-    color: var(--text-main, #ffffff);
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-}
-
-.option-box.selected {
-    border-color: var(--primary-accent, #00d2ff);
-    background: rgba(0, 210, 255, 0.1);
-    color: var(--primary-accent, #00d2ff);
-    font-weight: 700;
-}
-/* ==========================================================================
-   تنسيقات أزرار السوشيال ميديا (Facebook, Instagram, TikTok)
-   ========================================================================== */
-.social-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: var(--bg-card, #131b2e);
-    border: 1px solid var(--border, #1e293b);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-main, #ffffff);
-    font-size: 1.2rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-/* لون الفيسبوك */
-.social-btn.facebook:hover {
-    background: #1877f2;
-    color: #ffffff;
-    border-color: #1877f2;
-    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
-    transform: translateY(-3px);
-}
-
-/* لون انستجرام */
-.social-btn.instagram:hover {
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
-    transform: translateY(-3px);
-}
-
-/* لون التيك توك */
-.social-btn.tiktok:hover {
-    background: #000000;
-    color: #00f2fe;
-    border-color: #fe2c55;
-    box-shadow: 0 4px 15px rgba(254, 44, 85, 0.4);
-    transform: translateY(-3px);
 }
