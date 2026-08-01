@@ -398,36 +398,51 @@ window.openQuickView = function(productId) {
 
 // إنشاء وتحديث معرض الصور داخل نافذة المودال
 // إنشاء وتحديث معرض الصور داخل نافذة المودال
+// إنشاء وتحديث معرض الصور داخل نافذة المودال
 function renderModalCarousel() {
     const track = document.getElementById("modal-carousel-track");
     const dotsWrap = document.getElementById("modal-carousel-dots");
-    if(!track) return;
+    if (!track) return;
 
     // رص الصور داخل السلايدر
     track.innerHTML = modalImages.map(img => `
         <div class="modal-slide">
-            <img src="${img}" alt="Product Image">
+            <img src="${img}" alt="صورة المنتج">
         </div>
     `).join('');
     
-    if(dotsWrap) {
+    if (dotsWrap) {
         dotsWrap.innerHTML = modalImages.length > 1 ? modalImages.map((_, idx) => `
-            <span class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselSlide(${idx})"></span>
+            <span class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="window.goToCarouselSlide(${idx})"></span>
         `).join('') : '';
     }
     updateCarouselPosition();
 }
 
+// ربط الدوال بـ window لتسجيلها عالمياً للموديول (حل مشكلة Uncaught ReferenceError)
+window.moveCarousel = function(direction) {
+    if (!modalImages || modalImages.length <= 1) return;
+    currentImageIndex += direction;
+    if (currentImageIndex >= modalImages.length) currentImageIndex = 0;
+    if (currentImageIndex < 0) currentImageIndex = modalImages.length - 1;
+    updateCarouselPosition();
+};
+
+window.goToCarouselSlide = function(index) {
+    currentImageIndex = index;
+    updateCarouselPosition();
+};
+
 function updateCarouselPosition() {
     const track = document.getElementById("modal-carousel-track");
-    if(track) {
-        // التحريك بالسالب للتوافق التام مع اتجاه RTL العربي
+    if (track) {
+        // التحريك بنسبة 100% لكل صورة
         track.style.transform = `translateX(-${currentImageIndex * 100}%)`;
     }
 
     const dots = document.querySelectorAll("#modal-carousel-dots .carousel-dot");
     dots.forEach((dot, idx) => {
-        if(idx === currentImageIndex) dot.classList.add("active");
+        if (idx === currentImageIndex) dot.classList.add("active");
         else dot.classList.remove("active");
     });
 }
