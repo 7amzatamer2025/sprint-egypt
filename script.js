@@ -397,36 +397,33 @@ window.openQuickView = function(productId) {
 };
 
 // إنشاء وتحديث معرض الصور داخل نافذة المودال
+// إنشاء وتحديث معرض الصور داخل نافذة المودال
 function renderModalCarousel() {
     const track = document.getElementById("modal-carousel-track");
     const dotsWrap = document.getElementById("modal-carousel-dots");
     if(!track) return;
 
-    track.innerHTML = modalImages.map(img => `<img src="${img}" alt="Product Image">`).join('');
+    // رص الصور داخل السلايدر
+    track.innerHTML = modalImages.map(img => `
+        <div class="modal-slide">
+            <img src="${img}" alt="Product Image">
+        </div>
+    `).join('');
     
     if(dotsWrap) {
-        dotsWrap.innerHTML = modalImages.map((_, idx) => `
+        dotsWrap.innerHTML = modalImages.length > 1 ? modalImages.map((_, idx) => `
             <span class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselSlide(${idx})"></span>
-        `).join('');
+        `).join('') : '';
     }
     updateCarouselPosition();
 }
 
-window.moveCarousel = function(direction) {
-    currentImageIndex += direction;
-    if (currentImageIndex >= modalImages.length) currentImageIndex = 0;
-    if (currentImageIndex < 0) currentImageIndex = modalImages.length - 1;
-    updateCarouselPosition();
-};
-
-window.goToCarouselSlide = function(index) {
-    currentImageIndex = index;
-    updateCarouselPosition();
-};
-
 function updateCarouselPosition() {
     const track = document.getElementById("modal-carousel-track");
-    if(track) track.style.transform = `translateX(${currentImageIndex * 100}%)`;
+    if(track) {
+        // التحريك بالسالب للتوافق التام مع اتجاه RTL العربي
+        track.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    }
 
     const dots = document.querySelectorAll("#modal-carousel-dots .carousel-dot");
     dots.forEach((dot, idx) => {
