@@ -817,3 +817,23 @@ footer h4 {
         padding: 20px 15px !important;
     }
 }
+/* ==========================================
+   ضبط حجم لوجو الهيدر
+   ========================================== */
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.brand-logo {
+    max-height: 45px;      /* الارتفاع المناسب للهيدر */
+    width: auto;           /* يظبط العرض تلقائياً بدون مط الصورة */
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover .brand-logo {
+    transform: scale(1.05); /* إعطاء تأثير تفاعلي خفيف عند التمرير */
+}
