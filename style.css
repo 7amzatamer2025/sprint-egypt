@@ -701,28 +701,36 @@ footer h4 {
    تنسيق معرض الصور في المودال (سلايدر السهم)
    ========================================== */
 
-/* الحاوي الرئيسي للجهة اليسرى في المودال */
-.modal-grid .m-img-wrap,
-#modal-carousel-container {
+/* ==========================================================================
+   إصلاح المودال وسلايدر الصور بالكامل (DESKTOP & MOBILE)
+   ========================================================================== */
+
+/* 1. إصلاح حاوي الصور في المودال */
+.m-img-wrap {
     position: relative !important;
     width: 100% !important;
-    height: 100% !important;
-    min-height: 400px !important;
-    max-height: 480px !important;
-    overflow: hidden !important; /* إخفاء أي صورة خارج الكادر تماماً */
-    direction: ltr !important;   /* توحيد الحركة الأفقية للأسهم */
+    height: 350px !important;
+    overflow: hidden !important;
+    direction: ltr !important; /* لتوحيد اتجاه السلايدر أفقيًا */
+    background: #000;
 }
 
-/* الشريط الحامل للشرائح */
+#modal-carousel-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
 #modal-carousel-track {
     display: flex !important;
     flex-direction: row !important;
     width: 100% !important;
     height: 100% !important;
-    transition: transform 0.4s ease-in-out !important;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* شريحة كل صورة */
+/* 2. تجديد شكل السلايد الواحدة لتاخد العرض كاملاً */
 .modal-slide {
     min-width: 100% !important;
     width: 100% !important;
@@ -734,36 +742,32 @@ footer h4 {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
+    display: block !important;
 }
 
-/* إظهار والتحكم في أسهم التنقل فوق الصورة */
+/* 3. أسهم التنقل فوق الصورة */
 .carousel-arrow {
     position: absolute !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     background: rgba(0, 0, 0, 0.6) !important;
-    color: #ffffff !important;
+    color: #fff !important;
     border: none !important;
-    width: 38px !important;
-    height: 38px !important;
+    width: 36px !important;
+    height: 36px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
-    z-index: 50 !important;
-    font-size: 18px !important;
+    z-index: 100 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: background 0.3s ease !important;
+    font-size: 16px !important;
 }
 
-.carousel-arrow:hover {
-    background: var(--primary-accent) !important;
-}
+.carousel-arrow.prev { left: 10px !important; }
+.carousel-arrow.next { right: 10px !important; }
 
-.carousel-arrow.prev { left: 12px !important; }
-.carousel-arrow.next { right: 12px !important; }
-
-/* نقاط المؤشرات أسفل الصورة */
+/* 4. النقاط التوضيحية بالأسفل */
 .carousel-dots {
     position: absolute !important;
     bottom: 12px !important;
@@ -771,20 +775,45 @@ footer h4 {
     transform: translateX(-50%) !important;
     display: flex !important;
     gap: 6px !important;
-    z-index: 50 !important;
+    z-index: 100 !important;
 }
 
 .carousel-dot {
     width: 8px !important;
     height: 8px !important;
-    border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.5) !important;
+    border-radius: 50% !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
 }
 
 .carousel-dot.active {
     background: var(--primary-accent) !important;
     width: 16px !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
+}
+
+/* 📱 5. تجاوب المودال بالكامل مع الشاشات الصغيرة (الهواتف) */
+@media (max-width: 768px) {
+    .modal-popup {
+        width: 92% !important;
+        max-height: 88vh !important;
+        overflow-y: auto !important; /* يسمح بالتمرير إذا كانت التفاصيل طويلة */
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    .modal-grid {
+        grid-template-columns: 1fr !important; /* جعل الصورة فوق والتفاصيل تحت */
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .m-img-wrap {
+        height: 250px !important; /* ارتفاع ممتاز ومناسب لجميع الشاشات في الموبايل */
+    }
+
+    .m-info-wrap {
+        padding: 20px 15px !important;
+    }
 }
