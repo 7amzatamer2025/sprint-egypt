@@ -673,3 +673,27 @@ footer h4 {
     width: 12px;
     border-radius: 6px;
 }
+/* إصلاح حاوي الصور والسلايدر في المودال */
+.modal-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-height: 500px; /* أو الارتفاع المناسب لمودال موقعك */
+    overflow: hidden;  /* يمنع ظهور الصور الثانية تحت */
+    border-radius: 12px 0 0 12px;
+}
+
+#modal-carousel-track {
+    display: flex;             /* يخلي الصور جنب بعض أفقي مش تحت بعض */
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s ease-in-out; /* حركة سلايد ناعمة */
+}
+
+#modal-carousel-track img {
+    min-width: 100%;           /* كل صورة تاخد عرض المودال بالضبط */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;         /* ظبط أبعاد الصورة بدون مط */
+    flex-shrink: 0;            /* يمنع انكماش الصور */
+}
